@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Anggaran Romadan TA 2026</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Segoe UI',sans-serif; background:#1a1a2e; color:white; }
+
+    .slide {
+      width:1280px; height:720px;
+      margin:20px auto; padding:55px 60px;
+      display:flex; flex-direction:column; justify-content:center;
+      page-break-after:always; position:relative; overflow:hidden;
+    }
+
+    /* COVER */
+    .slide-cover {
+      background:linear-gradient(135deg,#0f3460 0%,#16213e 50%,#0f3460 100%);
+      align-items:center; text-align:center;
+    }
+    .slide-cover::before {
+      content:''; position:absolute; width:600px; height:600px; border-radius:50%;
+      background:rgba(255,255,255,0.03); top:-200px; right:-100px;
+    }
+    .badge {
+      background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2);
+      padding:8px 24px; border-radius:20px; font-size:13px; letter-spacing:2px;
+      margin-bottom:28px; display:inline-block;
+    }
+    .cover-title { font-size:50px; font-weight:700; line-height:1.2; margin-bottom:14px; }
+    .cover-title span { color:#f0a500; }
+    .cover-sub { font-size:18px; color:rgba(255,255,255,0.6); margin-bottom:40px; }
+    .cover-boxes { display:flex; gap:20px; justify-content:center; }
+    .cover-box { padding:18px 36px; border-radius:12px; text-align:center; }
+    .cover-box.gold { background:linear-gradient(135deg,#f0a500,#e67e22); }
+    .cover-box.teal { background:linear-gradient(135deg,#00b894,#00796b); }
+    .cover-box.blue2 { background:linear-gradient(135deg,#3498db,#2980b9); }
+    .cover-box .lbl { font-size:11px; opacity:.85; letter-spacing:1px; margin-bottom:4px; }
+    .cover-box .amt { font-size:28px; font-weight:700; }
+
+    /* COMMON */
+    .slide-dark { background:linear-gradient(135deg,#16213e 0%,#1a1a2e 100%); }
+    .stitle { font-size:13px; letter-spacing:3px; color:#f0a500; text-transform:uppercase; margin-bottom:8px; }
+    .sheading { font-size:32px; font-weight:700; margin-bottom:18px; }
+    .divider { width:50px; height:4px; background:#f0a500; border-radius:2px; margin-bottom:28px; }
+    .footer-slide { position:absolute; bottom:20px; right:36px; font-size:11px; color:rgba(255,255,255,0.2); }
+
+    /* CARDS */
+    .cards { display:flex; gap:20px; }
+    .card {
+      flex:1; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
+      border-radius:14px; padding:24px; position:relative; overflow:hidden;
+    }
+    .card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
+    .card.gold::before { background:linear-gradient(90deg,#f0a500,#e67e22); }
+    .card.blue::before { background:linear-gradient(90deg,#3498db,#2980b9); }
+    .card.green::before { background:linear-gradient(90deg,#2ecc71,#27ae60); }
+    .card.red::before { background:linear-gradient(90deg,#e74c3c,#c0392b); }
+    .card-icon { font-size:30px; margin-bottom:12px; }
+    .card-lbl { font-size:11px; color:rgba(255,255,255,0.5); margin-bottom:6px; letter-spacing:1px; }
+    .card-val { font-size:24px; font-weight:700; }
+    .card-val.gold { color:#f0a500; }
+    .card-val.blue { color:#3498db; }
+    .card-val.green { color:#2ecc71; }
+    .card-val.red { color:#e74c3c; }
+    .card-note { font-size:11px; color:rgba(255,255,255,0.4); margin-top:6px; }
+
+    /* PROGRESS */
+    .progress-section { margin-top:8px; }
+    .prog-row { margin-bottom:16px; }
+    .prog-header { display:flex; justify-content:space-between; margin-bottom:6px; }
+    .prog-name { font-size:13px; color:rgba(255,255,255,0.75); }
+    .prog-vals { font-size:12px; color:rgba(255,255,255,0.5); }
+    .prog-bar { height:8px; background:rgba(255,255,255,0.08); border-radius:4px; overflow:hidden; }
+    .prog-fill { height:100%; border-radius:4px; }
+
+    /* TABLE */
+    table { width:100%; border-collapse:collapse; }
+    thead tr { background:rgba(240,165,0,0.12); border-bottom:2px solid #f0a500; }
+    thead th { padding:11px 14px; font-size:12px; letter-spacing:1px; color:#f0a500; text-align:left; }
+    thead th.right { text-align:right; }
+    tbody tr { border-bottom:1px solid rgba(255,255,255,0.05); }
+    tbody td { padding:10px 14px; font-size:13px; color:rgba(255,255,255,0.75); }
+    tbody td.right { text-align:right; font-weight:600; color:white; }
+    tfoot tr { background:rgba(240,165,0,0.1); border-top:2px solid #f0a500; }
+    tfoot td { padding:12px 14px; font-weight:700; color:#f0a500; font-size:13px; }
+    tfoot td.right { text-align:right; }
+    .akun-badge {
+      background:rgba(255,255,255,0.08); padding:2px 8px;
+      border-radius:5px; font-size:11px; font-family:monospace;
+    }
+    .pct-pill { display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700; }
+    .pct-pill.low { background:rgba(231,76,60,0.2); color:#e74c3c; }
+    .pct-pill.mid { background:rgba(243,156,18,0.2); color:#f39c12; }
+    .pct-pill.high { background:rgba(46,204,113,0.2); color:#2ecc71; }
+
+    /* MONTHLY BARS */
+    .month-bars { display:flex; gap:16px; align-items:flex-end; height:220px; margin-top:10px; }
+    .month-col { flex:1; display:flex; flex-direction:column; align-items:center; gap:8px; }
+    .bar-wrap { width:100%; display:flex; flex-direction:column; justify-content:flex-end; height:180px; }
+    .bar {
+      width:100%; border-radius:6px 6px 0 0;
+      display:flex; align-items:flex-end; justify-content:center;
+      padding-bottom:6px; font-size:11px; font-weight:700;
+    }
+    .month-lbl { font-size:13px; color:rgba(255,255,255,0.6); }
+    .month-amt { font-size:12px; font-weight:700; color:white; }
+
+    /* CLOSING */
+    .points { display:flex; flex-direction:column; gap:16px; }
+    .point {
+      display:flex; align-items:flex-start; gap:18px;
+      background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
+      border-radius:10px; padding:16px 20px;
+    }
+    .point-icon { font-size:26px; flex-shrink:0; }
+    .point-text strong { display:block; font-size:15px; color:#f0a500; margin-bottom:3px; }
+    .point-text p { font-size:13px; color:rgba(255,255,255,0.65); line-height:1.5; }
+
+    /* NAV BAR */
+    .nav {
+      position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+      background:rgba(0,0,0,0.82); backdrop-filter:blur(12px);
+      padding:10px 18px; border-radius:40px;
+      display:flex; gap:8px; z-index:999; align-items:center;
+    }
+    .nav button {
+      border:1px solid rgba(255,255,255,0.2); color:white;
+      padding:7px 16px; border-radius:20px; cursor:pointer; font-size:12px;
+      background:rgba(255,255,255,0.1); transition:all .2s;
+    }
+    .nav button:hover { background:#f0a500; color:#000; border-color:#f0a500; }
+    .nav button.pdf-btn { background:rgba(231,76,60,0.2); border-color:#e74c3c; color:#e74c3c; }
+    .nav button.pdf-btn:hover { background:#e74c3c; color:white; }
+    .nav button.print-btn { background:rgba(52,152,219,0.2); border-color:#3498db; color:#3498db; }
+    .nav button.print-btn:hover { background:#3498db; color:white; }
+    .nav span { color:rgba(255,255,255,0.4); font-size:12px; padding:0 4px; }
+
+    /* LOADING OVERLAY */
+    #loading-overlay {
+      display:none; position:fixed; inset:0;
+      background:rgba(0,0,0,0.85); z-index:9999;
+      flex-direction:column; align-items:center; justify-content:center; gap:20px;
+    }
+    #loading-overlay.show { display:flex; }
+    .spinner {
+      width:48px; height:48px; border:4px solid rgba(255,255,255,0.1);
+      border-top-color:#f0a500; border-radius:50%;
+      animation:spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    #loading-overlay p { font-size:16px; color:rgba(255,255,255,0.7); }
+    #loading-overlay .progress-text { font-size:13px; color:#f0a500; }
+
+    /* PRINT */
+    @media print {
+      body { background:#1a1a2e !important; }
+      .slide {
+        margin:0 !important; display:flex !important;
+        page-break-after:always;
+        -webkit-print-color-adjust:exact;
+        print-color-adjust:exact;
+      }
+      .nav { display:none !important; }
+      #loading-overlay { display:none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOADING OVERLAY -->
+<div id="loading-overlay">
+  <div class="spinner"></div>
+  <p>Menyiapkan PDF...</p>
+  <div class="progress-text" id="loading-progress">Memproses slide 0 / 6</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 1: COVER                              -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide slide-cover" id="slide-1">
+  <div class="badge">RAHASIA INTERNAL · BOD BRIEFING</div>
+  <div class="cover-title">Postur Anggaran &amp; Realisasi<br><span>Romadan</span> TA 2026</div>
+  <div class="cover-sub">Executive Summary — s.d. Maret 2026</div>
+  <div class="cover-boxes">
+    <div class="cover-box gold">
+      <div class="lbl">TOTAL PAGU (EXCL. ASURANSI)</div>
+      <div class="amt">Rp 730,07 Jt</div>
+    </div>
+    <div class="cover-box teal">
+      <div class="lbl">REALISASI S.D. MARET 2026</div>
+      <div class="amt">Rp 135,83 Jt</div>
+    </div>
+    <div class="cover-box blue2">
+      <div class="lbl">PERSENTASE SERAPAN</div>
+      <div class="amt">18,6%</div>
+    </div>
+  </div>
+  <div class="footer-slide">CONFIDENTIAL</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 2: OVERVIEW                           -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide slide-dark" id="slide-2">
+  <div class="stitle">Executive Overview</div>
+  <div class="sheading">Ringkasan Pagu Anggaran</div>
+  <div class="divider"></div>
+  <div class="cards">
+    <div class="card gold">
+      <div class="card-icon">📊</div>
+      <div class="card-lbl">TOTAL PAGU (INCL. ASURANSI)</div>
+      <div class="card-val gold">Rp 28,06 M</div>
+      <div class="card-note">8 akun belanja</div>
+    </div>
+    <div class="card blue">
+      <div class="card-icon">🏗️</div>
+      <div class="card-lbl">BELANJA ASURANSI GEDUNG</div>
+      <div class="card-val blue">Rp 27,13 M</div>
+      <div class="card-note">96,7% dari total pagu</div>
+    </div>
+    <div class="card green">
+      <div class="card-icon">⚙️</div>
+      <div class="card-lbl">BELANJA OPERASIONAL MURNI</div>
+      <div class="card-val green">Rp 730,07 Jt</div>
+      <div class="card-note">Exclude asuransi</div>
+    </div>
+    <div class="card red">
+      <div class="card-icon">📈</div>
+      <div class="card-lbl">REALISASI S.D. MARET</div>
+      <div class="card-val red">Rp 135,83 Jt</div>
+      <div class="card-note">Serapan 18,6%</div>
+    </div>
+  </div>
+  <div class="footer-slide">CONFIDENTIAL</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 3: REALISASI PER BULAN                -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide slide-dark" id="slide-3">
+  <div class="stitle">Realisasi Anggaran</div>
+  <div class="sheading">Perkembangan Serapan Per Bulan</div>
+  <div class="divider"></div>
+  <div style="display:flex; gap:40px; align-items:flex-start;">
+    <div style="flex:1">
+      <div class="month-bars">
+        <div class="month-col">
+          <div class="bar-wrap">
+            <div class="bar" style="height:2px; background:rgba(255,255,255,0.15); color:rgba(255,255,255,0.3);">0%</div>
+          </div>
+          <div class="month-lbl">Januari</div>
+          <div class="month-amt">Rp 0</div>
+        </div>
+        <div class="month-col">
+          <div class="bar-wrap">
+            <div class="bar" style="height:55px; background:linear-gradient(180deg,#3498db,#2980b9);">6,2%</div>
+          </div>
+          <div class="month-lbl">Februari</div>
+          <div class="month-amt">Rp 45,27 Jt</div>
+        </div>
+        <div class="month-col">
+          <div class="bar-wrap">
+            <div class="bar" style="height:110px; background:linear-gradient(180deg,#f0a500,#e67e22);">12,4%</div>
+          </div>
+          <div class="month-lbl">Maret</div>
+          <div class="month-amt">Rp 90,56 Jt</div>
+        </div>
+        <div class="month-col">
+          <div class="bar-wrap">
+            <div class="bar" style="height:2px; background:rgba(255,255,255,0.08);"></div>
+          </div>
+          <div class="month-lbl" style="color:rgba(255,255,255,0.3);">Apr–Des</div>
+          <div class="month-amt" style="color:rgba(255,255,255,0.3);">—</div>
+        </div>
+      </div>
+    </div>
+    <div style="width:340px; display:flex; flex-direction:column; gap:14px;">
+      <div class="card blue" style="padding:18px;">
+        <div class="card-lbl">REALISASI FEBRUARI</div>
+        <div class="card-val blue" style="font-size:20px;">Rp 45.271.335</div>
+        <div class="card-note">6,2% dari pagu operasional</div>
+      </div>
+      <div class="card gold" style="padding:18px;">
+        <div class="card-lbl">REALISASI MARET</div>
+        <div class="card-val gold" style="font-size:20px;">Rp 90.560.094</div>
+        <div class="card-note">12,4% dari pagu operasional</div>
+      </div>
+      <div class="card green" style="padding:18px;">
+        <div class="card-lbl">KUMULATIF S.D. MARET</div>
+        <div class="card-val green" style="font-size:20px;">Rp 135.831.429</div>
+        <div class="card-note">18,6% dari pagu operasional</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-slide">CONFIDENTIAL</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 4: TABEL REALISASI PER AKUN           -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide slide-dark" id="slide-4">
+  <div class="stitle">Realisasi Per Akun</div>
+  <div class="sheading">Serapan Anggaran Operasional s.d. Maret 2026</div>
+  <div class="divider"></div>
+  <table>
+    <thead>
+      <tr>
+        <th>AKUN</th>
+        <th>URAIAN</th>
+        <th class="right">PAGU (Rp)</th>
+        <th class="right">REALISASI (Rp)</th>
+        <th class="right">SISA (Rp)</th>
+        <th class="right">%</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="akun-badge">524111</span></td>
+        <td>Belanja Perjadin Biasa</td>
+        <td class="right">480.887.000</td>
+        <td class="right">50.177.429</td>
+        <td class="right">430.709.571</td>
+        <td class="right"><span class="pct-pill low">10,4%</span></td>
+      </tr>
+      <tr>
+        <td><span class="akun-badge">521115</span></td>
+        <td>Belanja Honor Operasional Satker</td>
+        <td class="right">201.000.000</td>
+        <td class="right">30.000.000</td>
+        <td class="right">171.000.000</td>
+        <td class="right"><span class="pct-pill low">14,9%</span></td>
+      </tr>
+      <tr>
+        <td><span class="akun-badge">521211</span></td>
+        <td>Belanja Bahan</td>
+        <td class="right">118.231.000</td>
+        <td class="right">44.258.000</td>
+        <td class="right">73.973.000</td>
+        <td class="right"><span class="pct-pill mid">37,4%</span></td>
+      </tr>
+      <tr>
+        <td><span class="akun-badge">524113</span></td>
+        <td>Belanja Perjadin Dalkot</td>
+        <td class="right">73.984.000</td>
+        <td class="right">11.396.000</td>
+        <td class="right">62.588.000</td>
+        <td class="right"><span class="pct-pill low">15,4%</span></td>
+      </tr>
+      <tr>
+        <td><span class="akun-badge">522191</span></td>
+        <td>Belanja Jasa Lainnya</td>
+        <td class="right">42.500.000</td>
+        <td class="right">0</td>
+        <td class="right">42.500.000</td>
+        <td class="right"><span class="pct-pill low">0%</span></td>
+      </tr>
+      <tr>
+        <td><span class="akun-badge">521213</span></td>
+        <td>Belanja Honor Output Kegiatan</td>
+        <td class="right">11.000.000</td>
+        <td class="right">0</td>
+        <td class="right">11.000.000</td>
+        <td class="right"><span class="pct-pill low">0%</span></td>
+      </tr>
+      <tr>
+        <td><span class="akun-badge">522151</span></td>
+        <td>Belanja Jasa Profesi</td>
+        <td class="right">3.468.000</td>
+        <td class="right">0</td>
+        <td class="right">3.468.000</td>
+        <td class="right"><span class="pct-pill low">0%</span></td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="2">TOTAL OPERASIONAL (EXCL. ASURANSI)</td>
+        <td class="right">730.070.000</td>
+        <td class="right">135.831.429</td>
+        <td class="right">594.238.571</td>
+        <td class="right">18,6%</td>
+      </tr>
+    </tfoot>
+  </table>
+  <div class="footer-slide">CONFIDENTIAL</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 5: PROGRESS BAR                       -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide slide-dark" id="slide-5">
+  <div class="stitle">Visualisasi Serapan</div>
+  <div class="sheading">Progress Realisasi Per Akun Belanja</div>
+  <div class="divider"></div>
+  <div class="progress-section">
+    <div class="prog-row">
+      <div class="prog-header">
+        <span class="prog-name">524111 · Perjadin Biasa</span>
+        <span class="prog-vals">Rp 50,18 Jt / Rp 480,89 Jt &nbsp;|&nbsp; <strong>10,4%</strong></span>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" style="width:10.4%;background:linear-gradient(90deg,#e74c3c,#c0392b);"></div></div>
+    </div>
+    <div class="prog-row">
+      <div class="prog-header">
+        <span class="prog-name">521115 · Honor Operasional Satker</span>
+        <span class="prog-vals">Rp 30,00 Jt / Rp 201,00 Jt &nbsp;|&nbsp; <strong>14,9%</strong></span>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" style="width:14.9%;background:linear-gradient(90deg,#e74c3c,#c0392b);"></div></div>
+    </div>
+    <div class="prog-row">
+      <div class="prog-header">
+        <span class="prog-name">521211 · Belanja Bahan</span>
+        <span class="prog-vals">Rp 44,26 Jt / Rp 118,23 Jt &nbsp;|&nbsp; <strong>37,4%</strong></span>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" style="width:37.4%;background:linear-gradient(90deg,#f39c12,#d35400);"></div></div>
+    </div>
+    <div class="prog-row">
+      <div class="prog-header">
+        <span class="prog-name">524113 · Perjadin Dalkot</span>
+        <span class="prog-vals">Rp 11,40 Jt / Rp 73,98 Jt &nbsp;|&nbsp; <strong>15,4%</strong></span>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" style="width:15.4%;background:linear-gradient(90deg,#e74c3c,#c0392b);"></div></div>
+    </div>
+    <div class="prog-row">
+      <div class="prog-header">
+        <span class="prog-name">522191 · Jasa Lainnya</span>
+        <span class="prog-vals">Rp 0 / Rp 42,50 Jt &nbsp;|&nbsp; <strong>0%</strong></span>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" style="width:0.5%;background:rgba(255,255,255,0.15);"></div></div>
+    </div>
+    <div class="prog-row">
+      <div class="prog-header">
+        <span class="prog-name">521213 · Honor Output Kegiatan</span>
+        <span class="prog-vals">Rp 0 / Rp 11,00 Jt &nbsp;|&nbsp; <strong>0%</strong></span>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" style="width:0.5%;background:rgba(255,255,255,0.15);"></div></div>
+    </div>
+    <div class="prog-row">
+      <div class="prog-header">
+        <span class="prog-name">522151 · Jasa Profesi</span>
+        <span class="prog-vals">Rp 0 / Rp 3,47 Jt &nbsp;|&nbsp; <strong>0%</strong></span>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" style="width:0.5%;background:rgba(255,255,255,0.15);"></div></div>
+    </div>
+    <div class="prog-row" style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);">
+      <div class="prog-header">
+        <span class="prog-name" style="font-weight:700;color:#f0a500;">TOTAL OPERASIONAL</span>
+        <span class="prog-vals" style="color:#f0a500;">Rp 135,83 Jt / Rp 730,07 Jt &nbsp;|&nbsp; <strong>18,6%</strong></span>
+      </div>
+      <div class="prog-bar" style="height:12px;"><div class="prog-fill" style="width:18.6%;background:linear-gradient(90deg,#f0a500,#e67e22);"></div></div>
+    </div>
+  </div>
+  <div class="footer-slide">CONFIDENTIAL</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SLIDE 6: KESIMPULAN                         -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="slide slide-dark" id="slide-6">
+  <div class="stitle">Kesimpulan</div>
+  <div class="sheading">Poin Utama untuk Pimpinan</div>
+  <div class="divider"></div>
+  <div class="points">
+    <div class="point">
+      <div class="point-icon">📉</div>
+      <div class="point-text">
+        <strong>Serapan Masih Rendah — 18,6%</strong>
+        <p>Dari pagu operasional Rp730,07 jt, baru terealisasi Rp135,83 jt s.d. Maret 2026. Januari nihil realisasi, akselerasi mulai terlihat di Maret (Rp90,56 jt).</p>
+      </div>
+    </div>
+    <div class="point">
+      <div class="point-icon">🍽️</div>
+      <div class="point-text">
+        <strong>Belanja Bahan Paling Progresif</strong>
+        <p>Akun 521211 (Konsumsi Rapat) telah terserap 37,4% — tertinggi dibanding akun lain, didominasi kegiatan koordinasi dan konsultasi lintas unit.</p>
+      </div>
+    </div>
+    <div class="point">
+      <div class="point-icon">✈️</div>
+      <div class="point-text">
+        <strong>Perjadin Biasa Perlu Didorong</strong>
+        <p>Akun 524111 baru terserap 10,4% dari pagu Rp480,89 jt — porsi terbesar anggaran, namun realisasi masih minim dan perlu akselerasi segera.</p>
+      </div>
+    </div>
+    <div class="point">
+      <div class="point-icon">⚠️</div>
+      <div class="point-text">
+        <strong>3 Akun Belum Ada Realisasi</strong>
+        <p>Jasa Lainnya (522191), Honor Output (521213), dan Jasa Profesi (522151) belum ada realisasi — perlu monitoring dan percepatan pelaksanaan kegiatan.</p>
+      </div>
+    </div>
+  </div>
+  <div class="footer-slide">CONFIDENTIAL</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- NAVIGATION BAR                              -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="nav">
+  <button onclick="prevSlide()">← Prev</button>
+  <span id="nav-info">1 / 6</span>
+  <button onclick="nextSlide()">Next →</button>
+  <span style="color:rgba(255,255,255,0.2);">|</span>
+  <button class="print-btn" onclick="printPDF()">🖨️ Print</button>
+  <button class="pdf-btn" onclick="downloadPDF()">⬇️ Download PDF</button>
+</div>
+
+<script>
+  const { jsPDF } = window.jspdf;
+  const slides = document.querySelectorAll('.slide');
+  const totalSlides = slides.length;
+  let current = 0;
+
+  /* ── Tampilkan satu slide ── */
+  function showSlide(n) {
+    slides.forEach((s, i) => s.style.display = i === n ? 'flex' : 'none');
+    document.getElementById('nav-info').textContent = `${n + 1} / ${totalSlides}`;
+  }
+  function nextSlide() { if (current < totalSlides - 1) { current++; showSlide(current); } }
+  function prevSlide() { if (current > 0) { current--; showSlide(current); } }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextSlide();
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   prevSlide();
+  });
+
+  /* ── Print ── */
+  function printPDF() {
+    // Tampilkan semua slide saat print
+    slides.forEach(s => s.style.display = 'flex');
+    window.print();
+    // Kembalikan ke slide aktif
+    showSlide(current);
+  }
+
+  /* ── Download PDF via html2canvas + jsPDF ── */
+  async function downloadPDF() {
+    const overlay = document.getElementById('loading-overlay');
+    const progressText = document.getElementById('loading-progress');
+    overlay.classList.add('show');
+
+    const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [1280, 720] });
+    const savedCurrent = current;
+
+    for (let i = 0; i < totalSlides; i++) {
+      progressText.textContent = `Memproses slide ${i + 1} / ${totalSlides}`;
+
+      // Tampilkan slide yg akan di-capture
+      slides.forEach((s, idx) => s.style.display = idx === i ? 'flex' : 'none');
+
+      // Tunggu render
+      await new Promise(r => setTimeout(r, 300));
+
+      const canvas = await html2canvas(slides[i], {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: null,
+        logging: false,
+        width: 1280,
+        height: 720
+      });
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+      if (i > 0) pdf.addPage([1280, 720], 'landscape');
+      pdf.addImage(imgData, 'JPEG', 0, 0, 1280, 720);
+    }
+
+    progressText.textContent = 'Menyimpan file...';
+    pdf.save('Anggaran_Romadan_TA2026.pdf');
+
+    overlay.classList.remove('show');
+    showSlide(savedCurrent);
+  }
+
+  // Init
+  showSlide(0);
+</script>
+</body>
+</html>
