@@ -1,1219 +1,1034 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
-  <meta charset="UTF-8">
-  <title>Anggaran Romadan TA 2026</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #1a1a2e;
-      color: white;
-    }
-
-    #init-screen {
-      position: fixed;
-      inset: 0;
-      background: #1a1a2e;
-      z-index: 99999;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 20px;
-    }
-
-    #init-screen.hide {
-      display: none;
-    }
-
-    .spinner {
-      width: 52px;
-      height: 52px;
-      border: 4px solid rgba(255, 255, 255, 0.1);
-      border-top-color: #f0a500;
-      border-radius: 50%;
-      animation: spin .8s linear infinite;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    #init-screen p {
-      font-size: 16px;
-      color: rgba(255, 255, 255, 0.7);
-    }
-
-    #init-screen .sub {
-      font-size: 13px;
-      color: #f0a500;
-    }
-
-    #error-banner {
-      display: none;
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #e74c3c;
-      color: white;
-      padding: 12px 28px;
-      border-radius: 10px;
-      font-size: 14px;
-      z-index: 99998;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-    }
-
-    #pdf-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.88);
-      z-index: 9999;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 18px;
-    }
-
-    #pdf-overlay.show {
-      display: flex;
-    }
-
-    #pdf-overlay p {
-      font-size: 16px;
-      color: rgba(255, 255, 255, 0.7);
-    }
-
-    #pdf-overlay .prog-text {
-      font-size: 13px;
-      color: #f0a500;
-    }
-
-    .slide {
-      width: 1280px;
-      height: 720px;
-      margin: 20px auto;
-      padding: 55px 60px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      page-break-after: always;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .slide-cover {
-      background: linear-gradient(135deg, #0f3460 0%, #16213e 50%, #0f3460 100%);
-      align-items: center;
-      text-align: center;
-    }
-
-    .slide-cover::before {
-      content: '';
-      position: absolute;
-      width: 600px;
-      height: 600px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.03);
-      top: -200px;
-      right: -100px;
-    }
-
-    .slide-dark {
-      background: linear-gradient(135deg, #16213e 0%, #1a1a2e 100%);
-    }
-
-    .badge {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      padding: 8px 24px;
-      border-radius: 20px;
-      font-size: 13px;
-      letter-spacing: 2px;
-      margin-bottom: 24px;
-      display: inline-block;
-    }
-
-    .cover-title {
-      font-size: 44px;
-      font-weight: 700;
-      line-height: 1.2;
-      margin-bottom: 12px;
-    }
-
-    .cover-title span {
-      color: #f0a500;
-    }
-
-    .cover-sub {
-      font-size: 16px;
-      color: rgba(255, 255, 255, 0.6);
-      margin-bottom: 32px;
-    }
-
-    .cover-boxes {
-      display: flex;
-      gap: 16px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    .cover-box {
-      padding: 16px 26px;
-      border-radius: 12px;
-      text-align: center;
-      min-width: 180px;
-    }
-
-    .cover-box.gold {
-      background: linear-gradient(135deg, #f0a500, #e67e22);
-    }
-
-    .cover-box.teal {
-      background: linear-gradient(135deg, #00b894, #00796b);
-    }
-
-    .cover-box.blue2 {
-      background: linear-gradient(135deg, #3498db, #2980b9);
-    }
-
-    .cover-box.purple {
-      background: linear-gradient(135deg, #9b59b6, #8e44ad);
-    }
-
-    .cover-box .lbl {
-      font-size: 10px;
-      opacity: .85;
-      letter-spacing: 1px;
-      margin-bottom: 4px;
-    }
-
-    .cover-box .amt {
-      font-size: 22px;
-      font-weight: 700;
-    }
-
-    .stitle {
-      font-size: 13px;
-      letter-spacing: 3px;
-      color: #f0a500;
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-
-    .sheading {
-      font-size: 30px;
-      font-weight: 700;
-      margin-bottom: 16px;
-    }
-
-    .divider {
-      width: 50px;
-      height: 4px;
-      background: #f0a500;
-      border-radius: 2px;
-      margin-bottom: 22px;
-    }
-
-    .footer-slide {
-      position: absolute;
-      bottom: 18px;
-      right: 36px;
-      font-size: 11px;
-      color: rgba(255, 255, 255, 0.2);
-    }
-
-    .ts-label {
-      position: absolute;
-      bottom: 18px;
-      left: 36px;
-      font-size: 11px;
-      color: rgba(255, 255, 255, 0.25);
-    }
-
-    .cards {
-      display: flex;
-      gap: 16px;
-    }
-
-    .card {
-      flex: 1;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 14px;
-      padding: 22px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-    }
-
-    .card.gold::before {
-      background: linear-gradient(90deg, #f0a500, #e67e22);
-    }
-
-    .card.blue::before {
-      background: linear-gradient(90deg, #3498db, #2980b9);
-    }
-
-    .card.green::before {
-      background: linear-gradient(90deg, #2ecc71, #27ae60);
-    }
-
-    .card.red::before {
-      background: linear-gradient(90deg, #e74c3c, #c0392b);
-    }
-
-    .card.purple::before {
-      background: linear-gradient(90deg, #9b59b6, #8e44ad);
-    }
-
-    .card-icon {
-      font-size: 26px;
-      margin-bottom: 10px;
-    }
-
-    .card-lbl {
-      font-size: 10px;
-      color: rgba(255, 255, 255, 0.5);
-      margin-bottom: 5px;
-      letter-spacing: 1px;
-    }
-
-    .card-val {
-      font-size: 20px;
-      font-weight: 700;
-    }
-
-    .card-val.gold {
-      color: #f0a500;
-    }
-
-    .card-val.blue {
-      color: #3498db;
-    }
-
-    .card-val.green {
-      color: #2ecc71;
-    }
-
-    .card-val.red {
-      color: #e74c3c;
-    }
-
-    .card-val.purple {
-      color: #9b59b6;
-    }
-
-    .card-note {
-      font-size: 11px;
-      color: rgba(255, 255, 255, 0.4);
-      margin-top: 5px;
-    }
-
-    .prog-row {
-      margin-bottom: 13px;
-    }
-
-    .prog-header {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 5px;
-    }
-
-    .prog-name {
-      font-size: 13px;
-      color: rgba(255, 255, 255, 0.75);
-    }
-
-    .prog-vals {
-      font-size: 12px;
-      color: rgba(255, 255, 255, 0.5);
-    }
-
-    .prog-bar {
-      height: 8px;
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 4px;
-      overflow: hidden;
-    }
-
-    .prog-fill {
-      height: 100%;
-      border-radius: 4px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    thead tr {
-      background: rgba(240, 165, 0, 0.12);
-      border-bottom: 2px solid #f0a500;
-    }
-
-    thead th {
-      padding: 10px 12px;
-      font-size: 12px;
-      letter-spacing: 1px;
-      color: #f0a500;
-      text-align: left;
-    }
-
-    thead th.right {
-      text-align: right;
-    }
-
-    tbody tr {
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    tbody tr:hover {
-      background: rgba(255, 255, 255, 0.03);
-    }
-
-    tbody td {
-      padding: 9px 12px;
-      font-size: 12px;
-      color: rgba(255, 255, 255, 0.75);
-    }
-
-    tbody td.right {
-      text-align: right;
-      font-weight: 600;
-      color: white;
-    }
-
-    tfoot tr {
-      background: rgba(240, 165, 0, 0.1);
-      border-top: 2px solid #f0a500;
-    }
-
-    tfoot td {
-      padding: 11px 12px;
-      font-weight: 700;
-      color: #f0a500;
-      font-size: 13px;
-    }
-
-    tfoot td.right {
-      text-align: right;
-    }
-
-    .akun-badge {
-      background: rgba(255, 255, 255, 0.08);
-      padding: 2px 7px;
-      border-radius: 5px;
-      font-size: 11px;
-      font-family: monospace;
-    }
-
-    .pct-pill {
-      display: inline-block;
-      padding: 2px 7px;
-      border-radius: 10px;
-      font-size: 11px;
-      font-weight: 700;
-    }
-
-    .pct-pill.low {
-      background: rgba(231, 76, 60, 0.2);
-      color: #e74c3c;
-    }
-
-    .pct-pill.mid {
-      background: rgba(243, 156, 18, 0.2);
-      color: #f39c12;
-    }
-
-    .pct-pill.high {
-      background: rgba(46, 204, 113, 0.2);
-      color: #2ecc71;
-    }
-
-    .month-bars {
-      display: flex;
-      gap: 10px;
-      align-items: flex-end;
-      height: 190px;
-    }
-
-    .month-col {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .bar-wrap {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      height: 150px;
-    }
-
-    .bar {
-      width: 100%;
-      border-radius: 6px 6px 0 0;
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      padding-bottom: 4px;
-      font-size: 10px;
-      font-weight: 700;
-    }
-
-    .month-lbl {
-      font-size: 11px;
-      color: rgba(255, 255, 255, 0.6);
-    }
-
-    .month-amt {
-      font-size: 10px;
-      font-weight: 700;
-      color: white;
-      text-align: center;
-    }
-
-    .points {
-      display: flex;
-      flex-direction: column;
-      gap: 13px;
-    }
-
-    .point {
-      display: flex;
-      align-items: flex-start;
-      gap: 16px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 10px;
-      padding: 14px 18px;
-    }
-
-    .point-icon {
-      font-size: 24px;
-      flex-shrink: 0;
-    }
-
-    .point-text strong {
-      display: block;
-      font-size: 14px;
-      color: #f0a500;
-      margin-bottom: 2px;
-    }
-
-    .point-text p {
-      font-size: 13px;
-      color: rgba(255, 255, 255, 0.65);
-      line-height: 1.5;
-    }
-
-    .nav {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(12px);
-      padding: 9px 16px;
-      border-radius: 40px;
-      display: flex;
-      gap: 8px;
-      z-index: 999;
-      align-items: center;
-    }
-
-    .nav button {
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: white;
-      padding: 6px 14px;
-      border-radius: 20px;
-      cursor: pointer;
-      font-size: 12px;
-      background: rgba(255, 255, 255, 0.1);
-      transition: all .2s;
-    }
-
-    .nav button:hover {
-      background: #f0a500;
-      color: #000;
-      border-color: #f0a500;
-    }
-
-    .nav button.pdf-btn {
-      background: rgba(231, 76, 60, 0.2);
-      border-color: #e74c3c;
-      color: #e74c3c;
-    }
-
-    .nav button.pdf-btn:hover {
-      background: #e74c3c;
-      color: white;
-    }
-
-    .nav button.print-btn {
-      background: rgba(52, 152, 219, 0.2);
-      border-color: #3498db;
-      color: #3498db;
-    }
-
-    .nav button.print-btn:hover {
-      background: #3498db;
-      color: white;
-    }
-
-    .nav button.refresh-btn {
-      background: rgba(46, 204, 113, 0.2);
-      border-color: #2ecc71;
-      color: #2ecc71;
-    }
-
-    .nav button.refresh-btn:hover {
-      background: #2ecc71;
-      color: #000;
-    }
-
-    .nav span.sep {
-      color: rgba(255, 255, 255, 0.2);
-      padding: 0 2px;
-    }
-
-    @media print {
-      body {
-        background: #1a1a2e !important;
-      }
-
-      .slide {
-        margin: 0 !important;
-        display: flex !important;
-        page-break-after: always;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-      }
-
-      .nav,
-      #pdf-overlay,
-      #init-screen,
-      #error-banner {
-        display: none !important;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Anggaran Romadan TA 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+/* ══════════════════════════════════════════
+   RESET & ROOT
+══════════════════════════════════════════ */
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --gold:#f0a500;--blue:#3498db;--green:#2ecc71;--red:#e74c3c;
+  --purple:#9b59b6;--teal:#00b894;--bg:#1a1a2e;--card:#0f2040;
+  --border:rgba(255,255,255,.1);--muted:rgba(255,255,255,.5);
+  /* Slide native size */
+  --sw:1280px;--sh:720px;
+  /* Scale factor — updated via JS */
+  --sf:1;
+  /* Nav */
+  --nav-h:56px;
+}
+html,body{
+  width:100%;min-height:100%;
+  font-family:'Segoe UI',system-ui,sans-serif;
+  background:var(--bg);color:#fff;overflow-x:hidden;
+}
+
+/* ══════════════════════════════════════════
+   SLIDE VIEWPORT + SCALE
+══════════════════════════════════════════ */
+#stage{
+  width:100%;
+  padding-bottom:calc(var(--nav-h) + 12px);
+  display:flex;align-items:flex-start;justify-content:center;
+  min-height:100dvh;
+}
+.slide-wrap{
+  width:var(--sw);
+  transform-origin:top center;
+  transform:scale(var(--sf));
+  /* Keep layout height correct after scale */
+  margin-bottom:calc((var(--sh) * var(--sf)) - var(--sh));
+}
+
+/* ══════════════════════════════════════════
+   SLIDES
+══════════════════════════════════════════ */
+.slide{
+  width:var(--sw);height:var(--sh);
+  padding:52px 58px;
+  display:none;flex-direction:column;justify-content:center;
+  position:relative;overflow:hidden;
+  opacity:0;transform:translateY(14px);
+  transition:opacity .38s ease,transform .38s ease;
+}
+.slide.active{display:flex;opacity:1;transform:translateY(0)}
+.slide-cover{
+  background:linear-gradient(135deg,#0d2e55 0%,#16213e 50%,#0d2e55 100%);
+  align-items:center;text-align:center;
+}
+.slide-cover::before{
+  content:'';position:absolute;width:550px;height:550px;border-radius:50%;
+  background:rgba(255,255,255,.025);top:-180px;right:-90px;pointer-events:none;
+}
+.slide-cover::after{
+  content:'';position:absolute;width:380px;height:380px;border-radius:50%;
+  background:rgba(240,165,0,.035);bottom:-130px;left:-70px;pointer-events:none;
+}
+.slide-dark{background:linear-gradient(135deg,#16213e 0%,#1a1a2e 100%)}
+
+/* ══════════════════════════════════════════
+   COVER ELEMENTS
+══════════════════════════════════════════ */
+.badge{
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);
+  padding:7px 22px;border-radius:20px;font-size:11px;letter-spacing:2px;
+  margin-bottom:22px;display:inline-block;
+}
+.cover-title{font-size:42px;font-weight:700;line-height:1.2;margin-bottom:10px}
+.cover-title span{color:var(--gold)}
+.cover-sub{font-size:14px;color:var(--muted);margin-bottom:28px}
+.cover-boxes{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.cover-box{
+  padding:15px 24px;border-radius:14px;text-align:center;min-width:175px;
+  transition:transform .2s,box-shadow .2s;cursor:default;
+}
+.cover-box:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(0,0,0,.4)}
+.cover-box.gold{background:linear-gradient(135deg,#f0a500,#e67e22)}
+.cover-box.teal{background:linear-gradient(135deg,#00b894,#00796b)}
+.cover-box.blue2{background:linear-gradient(135deg,#3498db,#2980b9)}
+.cover-box.purple{background:linear-gradient(135deg,#9b59b6,#8e44ad)}
+.cover-box .lbl{font-size:9px;opacity:.85;letter-spacing:1.5px;margin-bottom:4px;text-transform:uppercase}
+.cover-box .amt{font-size:21px;font-weight:700}
+
+/* ══════════════════════════════════════════
+   SECTION HEADINGS
+══════════════════════════════════════════ */
+.stitle{font-size:11px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:5px}
+.sheading{font-size:28px;font-weight:700;margin-bottom:12px}
+.divider{width:46px;height:4px;background:var(--gold);border-radius:2px;margin-bottom:18px}
+.footer-slide{position:absolute;bottom:14px;right:32px;font-size:10px;color:rgba(255,255,255,.15)}
+.ts-label{position:absolute;bottom:14px;left:32px;font-size:10px;color:rgba(255,255,255,.2)}
+
+/* ══════════════════════════════════════════
+   CARDS
+══════════════════════════════════════════ */
+.cards{display:flex;gap:12px}
+.card{
+  flex:1;background:rgba(255,255,255,.04);border:1px solid var(--border);
+  border-radius:14px;padding:18px;position:relative;overflow:hidden;
+  transition:transform .2s,box-shadow .2s;cursor:default;
+}
+.card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.card.gold::before{background:linear-gradient(90deg,#f0a500,#e67e22)}
+.card.blue::before{background:linear-gradient(90deg,#3498db,#2980b9)}
+.card.green::before{background:linear-gradient(90deg,#2ecc71,#27ae60)}
+.card.red::before{background:linear-gradient(90deg,#e74c3c,#c0392b)}
+.card.purple::before{background:linear-gradient(90deg,#9b59b6,#8e44ad)}
+.card-icon{font-size:22px;margin-bottom:7px}
+.card-lbl{font-size:9px;color:var(--muted);margin-bottom:3px;letter-spacing:1px;text-transform:uppercase}
+.card-val{font-size:18px;font-weight:700}
+.card-val.gold{color:var(--gold)}.card-val.blue{color:var(--blue)}
+.card-val.green{color:var(--green)}.card-val.red{color:var(--red)}
+.card-val.purple{color:var(--purple)}
+.card-note{font-size:10px;color:rgba(255,255,255,.35);margin-top:4px}
+
+/* ══════════════════════════════════════════
+   PROGRESS BARS
+══════════════════════════════════════════ */
+.prog-row{margin-bottom:10px}
+.prog-header{display:flex;justify-content:space-between;margin-bottom:4px;gap:8px}
+.prog-name{font-size:11.5px;color:rgba(255,255,255,.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prog-vals{font-size:10.5px;color:var(--muted);flex-shrink:0}
+.prog-bar{height:7px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden}
+.prog-fill{height:100%;border-radius:4px;width:0;transition:width .85s cubic-bezier(.25,.46,.45,.94)}
+
+/* ══════════════════════════════════════════
+   TABLE
+══════════════════════════════════════════ */
+table{width:100%;border-collapse:collapse}
+thead tr{background:rgba(240,165,0,.09);border-bottom:2px solid var(--gold)}
+thead th{
+  padding:8px 10px;font-size:10.5px;letter-spacing:.7px;color:var(--gold);
+  text-align:left;white-space:nowrap;
+}
+thead th.r{text-align:right}
+tbody tr{border-bottom:1px solid rgba(255,255,255,.04);transition:background .15s}
+tbody tr:hover{background:rgba(255,255,255,.04)}
+tbody td{padding:7px 10px;font-size:11px;color:rgba(255,255,255,.7)}
+tbody td.r{text-align:right;font-weight:600;color:#fff}
+tfoot tr{background:rgba(240,165,0,.07);border-top:2px solid var(--gold)}
+tfoot td{padding:9px 10px;font-weight:700;color:var(--gold);font-size:11.5px}
+tfoot td.r{text-align:right}
+.akun-badge{
+  background:rgba(255,255,255,.07);padding:2px 6px;
+  border-radius:5px;font-size:10px;font-family:monospace;
+}
+.pct-pill{display:inline-block;padding:2px 6px;border-radius:10px;font-size:10px;font-weight:700}
+.pct-pill.low{background:rgba(231,76,60,.18);color:#e74c3c}
+.pct-pill.mid{background:rgba(243,156,18,.18);color:#f39c12}
+.pct-pill.high{background:rgba(46,204,113,.18);color:#2ecc71}
+
+/* ══════════════════════════════════════════
+   BAR CHART
+══════════════════════════════════════════ */
+.month-bars{display:flex;gap:8px;align-items:flex-end;height:175px}
+.month-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.bar-wrap{width:100%;display:flex;flex-direction:column;justify-content:flex-end;height:138px}
+.bar{
+  width:100%;border-radius:5px 5px 0 0;
+  display:flex;align-items:flex-end;justify-content:center;padding-bottom:2px;
+  font-size:8.5px;font-weight:700;height:0;
+  transition:height .72s cubic-bezier(.25,.46,.45,.94);
+  cursor:pointer;position:relative;
+}
+.bar:hover::after{
+  content:attr(data-tip);position:absolute;bottom:calc(100% + 5px);left:50%;
+  transform:translateX(-50%);background:rgba(0,0,0,.88);color:#fff;
+  font-size:10px;padding:4px 8px;border-radius:6px;white-space:nowrap;
+  pointer-events:none;z-index:20;
+}
+.month-lbl{font-size:9.5px;color:var(--muted)}
+.month-amt{font-size:9px;font-weight:700;color:#fff;text-align:center}
+
+/* ══════════════════════════════════════════
+   POINTS (KESIMPULAN)
+══════════════════════════════════════════ */
+.points{display:flex;flex-direction:column;gap:10px}
+.point{
+  display:flex;align-items:flex-start;gap:13px;
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);
+  border-radius:10px;padding:12px 15px;
+  transition:border-color .2s,background .2s;
+}
+.point:hover{background:rgba(255,255,255,.05);border-color:rgba(240,165,0,.28)}
+.point-icon{font-size:20px;flex-shrink:0;margin-top:1px}
+.point-text strong{display:block;font-size:12.5px;color:var(--gold);margin-bottom:2px}
+.point-text p{font-size:11.5px;color:rgba(255,255,255,.58);line-height:1.55}
+
+/* ══════════════════════════════════════════
+   SKELETON
+══════════════════════════════════════════ */
+.skel{
+  background:linear-gradient(90deg,rgba(255,255,255,.06) 25%,rgba(255,255,255,.1) 50%,rgba(255,255,255,.06) 75%);
+  background-size:200% 100%;animation:skel-wave 1.4s infinite;
+  border-radius:5px;display:inline-block;
+}
+@keyframes skel-wave{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ══════════════════════════════════════════
+   INIT SCREEN
+══════════════════════════════════════════ */
+#init-screen{
+  position:fixed;inset:0;background:var(--bg);z-index:99999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+  transition:opacity .4s ease;
+}
+#init-screen.fade-out{opacity:0;pointer-events:none}
+#init-screen.hide{display:none}
+.spinner{
+  width:48px;height:48px;border-radius:50%;
+  border:4px solid rgba(255,255,255,.08);border-top-color:var(--gold);
+  animation:spin .72s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+#init-screen p{font-size:15px;color:rgba(255,255,255,.65)}
+#init-screen .sub{font-size:12px;color:var(--gold)}
+.init-dots{display:flex;gap:7px;margin-top:2px}
+.init-dot{
+  width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.14);
+  animation:pulse-dot 1.4s ease-in-out infinite;
+}
+.init-dot:nth-child(2){animation-delay:.2s}
+.init-dot:nth-child(3){animation-delay:.4s}
+@keyframes pulse-dot{0%,80%,100%{opacity:.2}40%{opacity:1;background:var(--gold)}}
+
+/* ══════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════ */
+#toast{
+  position:fixed;top:18px;left:50%;
+  transform:translateX(-50%) translateY(-70px);
+  padding:10px 24px;border-radius:10px;font-size:13px;z-index:99998;
+  box-shadow:0 4px 24px rgba(0,0,0,.5);
+  transition:transform .32s cubic-bezier(.34,1.56,.64,1);
+  pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center;
+}
+#toast.show{transform:translateX(-50%) translateY(0)}
+#toast.err{background:#e74c3c;color:#fff}
+#toast.ok{background:#27ae60;color:#fff}
+#toast.info{background:#2980b9;color:#fff}
+
+/* ══════════════════════════════════════════
+   PDF OVERLAY
+══════════════════════════════════════════ */
+#pdf-ov{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);
+  z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+}
+#pdf-ov.show{display:flex}
+#pdf-ov p{font-size:15px;color:rgba(255,255,255,.65)}
+#pdf-bar-wrap{width:min(340px,80vw);height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden}
+#pdf-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--gold),#e67e22);border-radius:3px;transition:width .28s ease}
+
+/* ══════════════════════════════════════════
+   NAV BAR
+══════════════════════════════════════════ */
+.nav{
+  position:fixed;bottom:0;left:0;right:0;
+  height:var(--nav-h);
+  background:rgba(8,12,24,.92);backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  border-top:1px solid rgba(255,255,255,.07);
+  display:flex;gap:6px;z-index:999;
+  align-items:center;justify-content:center;
+  padding:0 12px;flex-wrap:nowrap;overflow-x:auto;
+  scrollbar-width:none;
+}
+.nav::-webkit-scrollbar{display:none}
+.nav button{
+  border:1px solid rgba(255,255,255,.18);color:#fff;
+  padding:5px 12px;border-radius:20px;cursor:pointer;
+  font-size:11.5px;background:rgba(255,255,255,.08);
+  transition:all .17s;white-space:nowrap;flex-shrink:0;
+}
+.nav button:hover:not(:disabled){background:var(--gold);color:#000;border-color:var(--gold);transform:translateY(-1px)}
+.nav button:active:not(:disabled){transform:translateY(0)}
+.nav button:disabled{opacity:.35;cursor:default}
+.nav button.pdf-btn{background:rgba(231,76,60,.13);border-color:rgba(231,76,60,.45);color:#e74c3c}
+.nav button.pdf-btn:hover:not(:disabled){background:#e74c3c;color:#fff;border-color:#e74c3c}
+.nav button.print-btn{background:rgba(52,152,219,.13);border-color:rgba(52,152,219,.45);color:#3498db}
+.nav button.print-btn:hover:not(:disabled){background:#3498db;color:#fff;border-color:#3498db}
+.nav button.ref-btn{background:rgba(46,204,113,.13);border-color:rgba(46,204,113,.45);color:#2ecc71}
+.nav button.ref-btn:hover:not(:disabled){background:#2ecc71;color:#000;border-color:#2ecc71}
+.sep{color:rgba(255,255,255,.16);padding:0 2px;font-size:15px;flex-shrink:0}
+#nav-info{color:rgba(255,255,255,.38);font-size:11px;padding:0 3px;min-width:40px;text-align:center;flex-shrink:0}
+.nav-dots{display:flex;gap:4px;align-items:center;flex-shrink:0}
+.nav-dot{
+  width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.2);
+  cursor:pointer;transition:all .18s;border:none;padding:0;flex-shrink:0;
+}
+.nav-dot.active{background:var(--gold);width:18px;border-radius:3px}
+.nav-dot:hover:not(.active){background:rgba(255,255,255,.5)}
+
+/* ══════════════════════════════════════════
+   PRINT
+══════════════════════════════════════════ */
+@media print{
+  body{background:var(--bg)!important}
+  #stage{padding:0!important;min-height:unset!important}
+  .slide-wrap{transform:none!important;margin:0!important;width:var(--sw)!important}
+  .slide{
+    display:flex!important;opacity:1!important;transform:none!important;
+    page-break-after:always;-webkit-print-color-adjust:exact;print-color-adjust:exact;
+  }
+  .nav,#pdf-ov,#init-screen,#toast{display:none!important}
+}
+
+/* ══════════════════════════════════════════
+   RESPONSIVE — TABLET (≤900px)
+   Slide scales via JS; these rules fix
+   overflow on very small contexts
+══════════════════════════════════════════ */
+@media(max-width:900px){
+  :root{--nav-h:52px}
+  .nav button{padding:4px 9px;font-size:11px}
+  /* Hide label-only separators when cramped */
+  .sep.hide-sm{display:none}
+}
+@media(max-width:600px){
+  :root{--nav-h:50px}
+  .nav{gap:4px;padding:0 8px}
+  .nav button{padding:4px 8px;font-size:10.5px}
+  /* Hide less critical nav buttons on tiny screens */
+  .nav-dots{display:none}
+  .nav .print-btn{display:none}
+}
+@media(max-width:380px){
+  .nav .pdf-btn span.pdf-lbl{display:none}
+}
+</style>
 </head>
-
 <body>
 
-  <!-- INIT -->
-  <div id="init-screen">
-    <div class="spinner"></div>
-    <p>Memuat data dari Google Sheets...</p>
-    <div class="sub" id="init-status">Menghubungkan ke server...</div>
+<!-- INIT SCREEN -->
+<div id="init-screen">
+  <div class="spinner"></div>
+  <p>Memuat data dari Google Sheets...</p>
+  <div class="sub" id="init-status">Menghubungkan ke server...</div>
+  <div class="init-dots">
+    <div class="init-dot"></div>
+    <div class="init-dot"></div>
+    <div class="init-dot"></div>
   </div>
-  <div id="error-banner"></div>
-  <div id="pdf-overlay">
-    <div class="spinner"></div>
-    <p>Menyiapkan PDF...</p>
-    <div class="prog-text" id="pdf-progress">Memproses slide 0 / 7</div>
-  </div>
+</div>
 
-  <!-- ══════════════════════════════════════════════════════
-     SLIDE 1 · COVER
-══════════════════════════════════════════════════════ -->
-  <div class="slide slide-cover" id="slide-1">
-    <div class="badge">RAHASIA INTERNAL · BOD BRIEFING</div>
-    <div class="cover-title">Postur Anggaran &amp; Realisasi<br><span>Romadan</span> TA 2026</div>
-    <div class="cover-sub">Executive Summary — Real-time dari Google Sheets</div>
-    <div class="cover-boxes">
-      <div class="cover-box gold">
-        <div class="lbl">TOTAL PAGU (EXCL. ASURANSI)</div>
-        <!-- C12 Summary2026 -->
-        <div class="amt" id="s1-pagu-excl">—</div>
-      </div>
-      <div class="cover-box teal">
-        <div class="lbl">REALISASI S.D. BULAN INI</div>
-        <!-- Z2 AnggaranRealisasi2026 -->
-        <div class="amt" id="s1-realisasi">—</div>
-      </div>
-      <div class="cover-box purple">
-        <div class="lbl">REALISASI OUTSTANDING</div>
-        <!-- Y2 AnggaranRealisasi2026 -->
-        <div class="amt" id="s1-outstanding">—</div>
-      </div>
-      <div class="cover-box blue2">
-        <div class="lbl">PERSENTASE SERAPAN</div>
-        <!-- T12 Summary2026 -->
-        <div class="amt" id="s1-persen">—</div>
-      </div>
+<div id="toast"></div>
+
+<!-- PDF OVERLAY -->
+<div id="pdf-ov">
+  <div class="spinner"></div>
+  <p>Menyiapkan PDF...</p>
+  <div class="prog-text" id="pdf-progress">Memproses slide 0 / 7</div>
+  <div id="pdf-bar-wrap"><div id="pdf-bar-fill"></div></div>
+</div>
+
+<!-- STAGE -->
+<div id="stage">
+<div class="slide-wrap" id="slide-wrap">
+
+<!-- ══ SLIDE 1 · COVER ══ -->
+<div class="slide slide-cover" id="slide-1">
+  <div class="badge">RAHASIA INTERNAL · BOD BRIEFING</div>
+  <div class="cover-title">Postur Anggaran &amp; Realisasi<br><span>Romadan</span> TA 2026</div>
+  <div class="cover-sub">Executive Summary — Real-time dari Google Sheets</div>
+  <div class="cover-boxes">
+    <div class="cover-box gold">
+      <div class="lbl">TOTAL PAGU (EXCL. ASURANSI)</div>
+      <div class="amt" id="s1-pagu-excl"><span class="skel" style="width:88px;height:20px"></span></div>
     </div>
-    <div class="ts-label" id="last-updated"></div>
-    <div class="footer-slide">CONFIDENTIAL</div>
-  </div>
-
-  <!-- ══════════════════════════════════════════════════════
-     SLIDE 2 · OVERVIEW
-══════════════════════════════════════════════════════ -->
-  <div class="slide slide-dark" id="slide-2">
-    <div class="stitle">Executive Overview</div>
-    <div class="sheading">Ringkasan Pagu Anggaran</div>
-    <div class="divider"></div>
-    <div class="cards">
-      <div class="card gold">
-        <div class="card-icon">📊</div>
-        <div class="card-lbl">TOTAL PAGU (INCL. ASURANSI)</div>
-        <!-- C11 Summary2026 -->
-        <div class="card-val gold" id="s2-incl">—</div>
-        <div class="card-note">Include Asuransi Gedung</div>
-      </div>
-      <div class="card blue">
-        <div class="card-icon">🏗️</div>
-        <div class="card-lbl">BELANJA ASURANSI GEDUNG</div>
-        <!-- C7 Summary2026 -->
-        <div class="card-val blue" id="s2-asuransi">—</div>
-        <div class="card-note" id="s2-asuransi-pct">—</div>
-      </div>
-      <div class="card green">
-        <div class="card-icon">⚙️</div>
-        <div class="card-lbl">BELANJA OPERASIONAL MURNI</div>
-        <!-- C12 Summary2026 -->
-        <div class="card-val green" id="s2-excl">—</div>
-        <div class="card-note">Exclude Asuransi</div>
-      </div>
-      <div class="card red">
-        <div class="card-icon">📈</div>
-        <div class="card-lbl">REALISASI KUMULATIF</div>
-        <!-- P12 Summary2026 -->
-        <div class="card-val red" id="s2-real">—</div>
-        <div class="card-note" id="s2-real-pct">—</div>
-      </div>
+    <div class="cover-box teal">
+      <div class="lbl">REALISASI S.D. BULAN INI</div>
+      <div class="amt" id="s1-realisasi"><span class="skel" style="width:88px;height:20px"></span></div>
     </div>
-    <div class="footer-slide">CONFIDENTIAL</div>
-  </div>
-
-  <!-- ══════════════════════════════════════════════════════
-     SLIDE 3 · REALISASI PER BULAN
-══════════════════════════════════════════════════════ -->
-  <div class="slide slide-dark" id="slide-3">
-    <div class="stitle">Realisasi Anggaran</div>
-    <div class="sheading">Perkembangan Serapan Per Bulan</div>
-    <div class="divider"></div>
-    <div style="display:flex;gap:32px;align-items:flex-start;">
-      <div style="flex:1">
-        <div class="month-bars" id="month-bars"></div>
-      </div>
-      <div style="width:300px;display:flex;flex-direction:column;gap:10px;" id="month-cards"></div>
+    <div class="cover-box purple">
+      <div class="lbl">REALISASI OUTSTANDING</div>
+      <div class="amt" id="s1-outstanding"><span class="skel" style="width:88px;height:20px"></span></div>
     </div>
-    <div class="footer-slide">CONFIDENTIAL</div>
+    <div class="cover-box blue2">
+      <div class="lbl">PERSENTASE SERAPAN</div>
+      <div class="amt" id="s1-persen"><span class="skel" style="width:58px;height:20px"></span></div>
+    </div>
   </div>
+  <div class="ts-label" id="last-updated"></div>
+  <div class="footer-slide">CONFIDENTIAL</div>
+</div>
 
-  <!-- ══════════════════════════════════════════════════════
-     SLIDE 4 · TABEL PER AKUN
-══════════════════════════════════════════════════════ -->
-  <div class="slide slide-dark" id="slide-4">
-    <div class="stitle">Realisasi Per Akun</div>
-    <div class="sheading">Serapan Anggaran Operasional</div>
-    <div class="divider"></div>
-    <table>
-      <thead>
-        <tr>
-          <th>AKUN</th>
-          <th>URAIAN</th>
-          <th class="right">PAGU (Rp)</th>
-          <th class="right">REALISASI (Rp)</th>
-          <th class="right">OUTSTANDING (Rp)</th>
-          <th class="right">SISA (Rp)</th>
-          <th class="right">%</th>
-        </tr>
-      </thead>
-      <tbody id="akun-tbody"></tbody>
-      <tfoot id="akun-tfoot"></tfoot>
-    </table>
-    <div class="footer-slide">CONFIDENTIAL</div>
+<!-- ══ SLIDE 2 · OVERVIEW ══ -->
+<div class="slide slide-dark" id="slide-2">
+  <div class="stitle">Executive Overview</div>
+  <div class="sheading">Ringkasan Pagu Anggaran</div>
+  <div class="divider"></div>
+  <div class="cards">
+    <div class="card gold">
+      <div class="card-icon">📊</div>
+      <div class="card-lbl">TOTAL PAGU (INCL. ASURANSI)</div>
+      <div class="card-val gold" id="s2-incl">—</div>
+      <div class="card-note">Include Asuransi Gedung</div>
+    </div>
+    <div class="card blue">
+      <div class="card-icon">🏗️</div>
+      <div class="card-lbl">BELANJA ASURANSI GEDUNG</div>
+      <div class="card-val blue" id="s2-asuransi">—</div>
+      <div class="card-note" id="s2-asuransi-pct">—</div>
+    </div>
+    <div class="card green">
+      <div class="card-icon">⚙️</div>
+      <div class="card-lbl">BELANJA OPERASIONAL MURNI</div>
+      <div class="card-val green" id="s2-excl">—</div>
+      <div class="card-note">Exclude Asuransi</div>
+    </div>
+    <div class="card red">
+      <div class="card-icon">📈</div>
+      <div class="card-lbl">REALISASI KUMULATIF</div>
+      <div class="card-val red" id="s2-real">—</div>
+      <div class="card-note" id="s2-real-pct">—</div>
+    </div>
   </div>
+  <div class="footer-slide">CONFIDENTIAL</div>
+</div>
 
-  <!-- ══════════════════════════════════════════════════════
-     SLIDE 5 · PROGRESS BAR
-══════════════════════════════════════════════════════ -->
-  <div class="slide slide-dark" id="slide-5">
-    <div class="stitle">Visualisasi Serapan</div>
-    <div class="sheading">Progress Realisasi Per Akun Belanja</div>
-    <div class="divider"></div>
-    <div id="progress-bars"></div>
-    <div class="footer-slide">CONFIDENTIAL</div>
+<!-- ══ SLIDE 3 · REALISASI PER BULAN ══ -->
+<div class="slide slide-dark" id="slide-3">
+  <div class="stitle">Realisasi Anggaran</div>
+  <div class="sheading">Perkembangan Serapan Per Bulan</div>
+  <div class="divider"></div>
+  <div style="display:flex;gap:28px;align-items:flex-start">
+    <div style="flex:1"><div class="month-bars" id="month-bars"></div></div>
+    <div style="width:278px;display:flex;flex-direction:column;gap:8px" id="month-cards"></div>
   </div>
-  <!-- ══════════════════════════════════════════════════════
-     SLIDE 6 · RPD TRIWULAN I
-══════════════════════════════════════════════════════ -->
-  <div class="slide slide-dark" id="slide-6">
-    <div class="stitle">Rencana Penarikan Dana</div>
-    <div class="sheading">Rencana Penarikan Dana Triwulan I</div>
-    <div class="divider"></div>
-    <table>
-      <thead>
-        <tr>
-          <th>NO</th>
-          <th>BAGIAN</th>
-          <th class="right">SEMULA RPD-TW I (Rp)</th>
-          <th class="right">REVISI RPD-TW I (Rp)</th>
-          <th class="right">REALISASI TW I (Rp)</th>
-          <th class="right">% SERAPAN</th>
-        </tr>
-      </thead>
-      <tbody id="bagian-tbody"></tbody>
-      <tfoot id="bagian-tfoot"></tfoot>
-    </table>
-    <div class="footer-slide">CONFIDENTIAL</div>
-  </div>
-  <!-- ══════════════════════════════════════════════════════
-     SLIDE 7 · KESIMPULAN
-══════════════════════════════════════════════════════ -->
-  <div class="slide slide-dark" id="slide-7">
-    <div class="stitle">Kesimpulan</div>
-    <div class="sheading">Poin Utama untuk Pimpinan</div>
-    <div class="divider"></div>
-    <div class="points" id="kesimpulan-points"></div>
-    <div class="footer-slide">CONFIDENTIAL</div>
-  </div>
+  <div class="footer-slide">CONFIDENTIAL</div>
+</div>
 
-  <!-- NAV -->
-  <div class="nav">
-    <button onclick="prevSlide()">← Prev</button>
-    <span id="nav-info" style="color:rgba(255,255,255,0.4);font-size:12px;padding:0 4px;">1 / 7</span>
-    <button onclick="nextSlide()">Next →</button>
-    <span class="sep">|</span>
-    <button class="refresh-btn" onclick="loadData()">🔄 Refresh</button>
-    <button class="print-btn" onclick="printAll()">🖨️ Print</button>
-    <button class="pdf-btn" onclick="downloadPDF()">⬇️ PDF</button>
-  </div>
+<!-- ══ SLIDE 4 · TABEL PER AKUN ══ -->
+<div class="slide slide-dark" id="slide-4">
+  <div class="stitle">Realisasi Per Akun</div>
+  <div class="sheading">Serapan Anggaran Operasional</div>
+  <div class="divider"></div>
+  <table>
+    <thead>
+      <tr>
+        <th>AKUN</th><th>URAIAN</th>
+        <th class="r">PAGU (Rp)</th><th class="r">REALISASI (Rp)</th>
+        <th class="r">OUTSTANDING (Rp)</th><th class="r">SISA (Rp)</th>
+        <th class="r">%</th>
+      </tr>
+    </thead>
+    <tbody id="akun-tbody"></tbody>
+    <tfoot id="akun-tfoot"></tfoot>
+  </table>
+  <div class="footer-slide">CONFIDENTIAL</div>
+</div>
 
-  <script>
-    // ══════════════════════════════════════════════
-    // KONFIGURASI
-    // ══════════════════════════════════════════════
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyvcsWjCGNLXZV03hCoKCO-E1f3fdFEQJnchbsFILKXcMeTFGYihWRuMZbErcxLcC4VJw/exec';
+<!-- ══ SLIDE 5 · PROGRESS BARS ══ -->
+<div class="slide slide-dark" id="slide-5">
+  <div class="stitle">Visualisasi Serapan</div>
+  <div class="sheading">Progress Realisasi Per Akun Belanja</div>
+  <div class="divider"></div>
+  <div id="progress-bars"></div>
+  <div class="footer-slide">CONFIDENTIAL</div>
+</div>
 
-    const MONTHS = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-    const MONTH_COLORS = ['#3498db', '#f0a500', '#2ecc71', '#9b59b6', '#e74c3c',
-      '#1abc9c', '#e67e22', '#3498db', '#f0a500', '#2ecc71', '#9b59b6', '#e74c3c'];
+<!-- ══ SLIDE 6 · RPD TRIWULAN I ══ -->
+<div class="slide slide-dark" id="slide-6">
+  <div class="stitle">Rencana Penarikan Dana</div>
+  <div class="sheading">Rencana Penarikan Dana Triwulan I</div>
+  <div class="divider"></div>
+  <table>
+    <thead>
+      <tr>
+        <th>NO</th><th>BAGIAN</th>
+        <th class="r">SEMULA RPD-TW I (Rp)</th>
+        <th class="r">REVISI RPD-TW I (Rp)</th>
+        <th class="r">REALISASI TW I (Rp)</th>
+        <th class="r">% SERAPAN</th>
+      </tr>
+    </thead>
+    <tbody id="bagian-tbody"></tbody>
+    <tfoot id="bagian-tfoot"></tfoot>
+  </table>
+  <div class="footer-slide">CONFIDENTIAL</div>
+</div>
 
-    // ══════════════════════════════════════════════
-    // MAPPING SEL SUMMARY2026
-    // Baris di array = index (0-based), kolom = 0-based
-    // Baris 1  (index 0)  = "POSTUR ANGGARAN ROMADAN TA 2026"
-    // Baris 2  (index 1)  = Header kolom
-    // Baris 3  (index 2)  = Akun 521211 dst.
-    // Baris 11 (index 10) = INCLUDE ASURANSI
-    // Baris 12 (index 11) = EXCLUDE ASURANSI
-    //
-    // Kolom: A=0,B=1,C=2,D=3(Jan),E=4(Feb),...,O=14(Des),
-    //        P=15(Realisasi),Q=16(Sisa),R=17(Outstanding),
-    //        S=18(RULES),T=19(% Serapan),U=20(% Serapan Full)
-    // ══════════════════════════════════════════════
-    const ROW_INCL_ASURANSI = 10; // baris 11 → index 10
-    const ROW_EXCL_ASURANSI = 11; // baris 12 → index 11
-    const ROW_ASURANSI_GEDUNG = 6; // baris 7  → index 6  (akun 523113)
+<!-- ══ SLIDE 7 · KESIMPULAN ══ -->
+<div class="slide slide-dark" id="slide-7">
+  <div class="stitle">Kesimpulan</div>
+  <div class="sheading">Poin Utama untuk Pimpinan</div>
+  <div class="divider"></div>
+  <div class="points" id="kesimpulan-points"></div>
+  <div class="footer-slide">CONFIDENTIAL</div>
+</div>
 
-    const COL_PAGU = 2;  // C
-    const COL_JAN = 3;  // D
-    const COL_REALISASI = 15; // P
-    const COL_SISA = 16; // Q
-    const COL_OUTSTANDING = 17; // R
-    const COL_PCT_SERAPAN = 19; // T
+</div><!-- /slide-wrap -->
+</div><!-- /stage -->
 
-    // AnggaranRealisasi2026: baris 2 = index 1
-    const AR_ROW_TOTAL = 1;
-    const AR_COL_OUTSTANDING = 24; // Y (0-based)
-    const AR_COL_REALISASI = 25; // Z (0-based)
+<!-- NAV -->
+<div class="nav">
+  <button id="btn-prev" onclick="prevSlide()">← Prev</button>
+  <span id="nav-info">1 / 7</span>
+  <button id="btn-next" onclick="nextSlide()">Next →</button>
+  <span class="sep hide-sm">|</span>
+  <div class="nav-dots" id="nav-dots"></div>
+  <span class="sep hide-sm">|</span>
+  <button class="ref-btn" id="btn-ref" onclick="loadData()">🔄 Refresh</button>
+  <button class="print-btn" onclick="printAll()">🖨️ Print</button>
+  <button class="pdf-btn" onclick="downloadPDF()">⬇️ <span class="pdf-lbl">PDF</span></button>
+</div>
 
-    // ══════════════════════════════════════════════
-    // HELPERS
-    // ══════════════════════════════════════════════
-    let current = 0;
-    const slides = document.querySelectorAll('.slide');
-    const totalSlides = slides.length;
+<script>
+/* ══════════════════════════════════════════
+   CONFIG
+══════════════════════════════════════════ */
+const CFG = {
+  URL:'https://script.google.com/macros/s/AKfycbyvcsWjCGNLXZV03hCoKCO-E1f3fdFEQJnchbsFILKXcMeTFGYihWRuMZbErcxLcC4VJw/exec',
+  AUTO_MS: 5*60*1000,
+  MAX_RETRY: 3,
+  RETRY_BASE: 1200,
+};
 
-    function toNum(v) { return Number(String(v).replace(/[^0-9.-]/g, '')) || 0; }
+const MONTHS=['Januari','Februari','Maret','April','Mei','Juni',
+               'Juli','Agustus','September','Oktober','November','Desember'];
+const MS=MONTHS.map(m=>m.slice(0,3));
+const MC=['#3498db','#f0a500','#2ecc71','#9b59b6','#e74c3c','#1abc9c',
+          '#e67e22','#3498db','#f0a500','#2ecc71','#9b59b6','#e74c3c'];
 
-    function fmt(n) {
-      const v = Math.round(toNum(n));
-      if (Math.abs(v) >= 1e9) return 'Rp ' + (v / 1e9).toFixed(2).replace('.', ',') + ' M';
-      if (Math.abs(v) >= 1e6) return 'Rp ' + (v / 1e6).toFixed(2).replace('.', ',') + ' Jt';
-      return 'Rp ' + v.toLocaleString('id-ID');
+/* cell mapping */
+const R_INCL=10,R_EXCL=11,R_ASR=6;
+const C_PAGU=2,C_JAN=3,C_REAL=15,C_SISA=16,C_OUT=17,C_PCT=19;
+const AR_ROW=1,AR_OUT=24,AR_REAL=25;
+const BAGIAN=[
+  {no:'71',bagian:'Pengembangan Strategi dan Kinerja',row:14},
+  {no:'72',bagian:'Perencanaan BMN',row:15},
+  {no:'73',bagian:'Pengelolaan BMN',row:16},
+  {no:'74',bagian:'Penatausahaan BMN',row:17},
+  {no:'75',bagian:'Manajemen Pengadaan',row:18},
+];
+
+/* ══════════════════════════════════════════
+   STATE
+══════════════════════════════════════════ */
+let cur=0, loading=false, arTimer=null;
+const slides=Array.from(document.querySelectorAll('.slide'));
+const TOTAL=slides.length;
+
+/* ══════════════════════════════════════════
+   RESPONSIVE SCALE
+══════════════════════════════════════════ */
+const SW=1280, SH=720;
+function applyScale(){
+  const vw=window.innerWidth;
+  const navH=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h'))||56;
+  const vh=window.innerHeight - navH - 24;
+  const scaleW=vw/SW;
+  const scaleH=vh/SH;
+  const sf=Math.min(scaleW,scaleH,1); /* never upscale beyond 1 */
+  document.documentElement.style.setProperty('--sf',sf);
+  /* Adjust stage height so scroll works */
+  const wrap=document.getElementById('slide-wrap');
+  wrap.style.marginBottom=(SH*sf - SH)+'px';
+  /* Center vertically if there is space */
+  const stage=document.getElementById('stage');
+  const usedH=SH*sf+navH+24;
+  if(window.innerHeight>usedH){
+    stage.style.paddingTop=Math.floor((window.innerHeight-usedH)/2)+'px';
+  }else{
+    stage.style.paddingTop='8px';
+  }
+}
+window.addEventListener('resize',applyScale,{passive:true});
+applyScale();
+
+/* ══════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════ */
+const toNum=v=>Number(String(v??'').replace(/[^0-9.-]/g,''))||0;
+function fmt(n){
+  const v=Math.round(toNum(n));
+  if(Math.abs(v)>=1e9)return'Rp '+(v/1e9).toFixed(2).replace('.',',')+' M';
+  if(Math.abs(v)>=1e6)return'Rp '+(v/1e6).toFixed(2).replace('.',',')+' Jt';
+  return'Rp '+v.toLocaleString('id-ID');
+}
+const fmtF=n=>Math.round(toNum(n)).toLocaleString('id-ID');
+function fmtP(v){
+  const n=toNum(v);
+  return(Math.abs(n)<=1?(n*100).toFixed(2):n.toFixed(2))+'%';
+}
+const pct=(r,p)=>p===0?0:(toNum(r)/toNum(p))*100;
+const pcls=p=>p>=80?'high':p>=40?'mid':'low';
+
+/* ══════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════ */
+let _tt;
+function toast(msg,type='info',dur=4000){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.className=`show ${type}`;
+  clearTimeout(_tt);_tt=setTimeout(()=>el.classList.remove('show'),dur);
+}
+
+/* ══════════════════════════════════════════
+   FETCH WITH RETRY
+══════════════════════════════════════════ */
+async function fetchSheet(name,attempt=0){
+  try{
+    const r=await fetch(`${CFG.URL}?sheet=${encodeURIComponent(name)}`,{cache:'no-store'});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    return r.json();
+  }catch(e){
+    if(attempt<CFG.MAX_RETRY){
+      await new Promise(r=>setTimeout(r,CFG.RETRY_BASE*Math.pow(2,attempt)));
+      return fetchSheet(name,attempt+1);
     }
-    function fmtFull(n) { return Math.round(toNum(n)).toLocaleString('id-ID'); }
-    function fmtPct(v) {
-      const n = toNum(v);
-      // jika sudah dalam bentuk desimal 0.xx → kalikan 100
-      return (Math.abs(n) <= 1 ? (n * 100).toFixed(2) : n.toFixed(2)) + '%';
-    }
-    function pctNum(real, pagu) { return pagu === 0 ? 0 : (toNum(real) / toNum(pagu)) * 100; }
-    function pctClass(p) { return p >= 80 ? 'high' : p >= 40 ? 'mid' : 'low'; }
+    throw e;
+  }
+}
 
-    // ══════════════════════════════════════════════
-    // FETCH
-    // ══════════════════════════════════════════════
-    async function fetchSheet(name) {
-      const r = await fetch(`${APPS_SCRIPT_URL}?sheet=${encodeURIComponent(name)}`);
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      return r.json();
-    }
+/* ══════════════════════════════════════════
+   RENDER
+══════════════════════════════════════════ */
+function render(sumRows,arRows){
+  const paguExcl =toNum(sumRows[R_EXCL]?.[C_PAGU]);
+  const paguIncl =toNum(sumRows[R_INCL]?.[C_PAGU]);
+  const paguAsr  =toNum(sumRows[R_ASR]?.[C_PAGU]);
+  const realKum  =toNum(sumRows[R_EXCL]?.[C_REAL]);
+  const pctSer   =sumRows[R_EXCL]?.[C_PCT];
+  const arOut    =toNum(arRows[AR_ROW]?.[AR_OUT]);
+  const arReal   =toNum(arRows[AR_ROW]?.[AR_REAL]);
 
-    // ══════════════════════════════════════════════
-    // RENDER
-    // ══════════════════════════════════════════════
-    function renderAll(sumRows, arRows) {
+  /* Akun data */
+  const akunData=[];
+  for(let i=2;i<=9;i++){
+    const r=sumRows[i];
+    if(!r||(!r[0]&&!r[1]))continue;
+    akunData.push({
+      akun:r[0],uraian:r[1],pagu:toNum(r[C_PAGU]),
+      bulan:MONTHS.map((_,mi)=>toNum(r[C_JAN+mi])),
+      real:toNum(r[C_REAL]),sisa:toNum(r[C_SISA]),
+      out:toNum(r[C_OUT]),pct:r[C_PCT]
+    });
+  }
 
-      // ── Ambil nilai spesifik dari Summary2026 ──────────────────
-      const paguExcl = toNum(sumRows[ROW_EXCL_ASURANSI]?.[COL_PAGU]);         // C12
-      const paguIncl = toNum(sumRows[ROW_INCL_ASURANSI]?.[COL_PAGU]);         // C11
-      const paguAsuransi = toNum(sumRows[ROW_ASURANSI_GEDUNG]?.[COL_PAGU]);       // C7
-      const realKumulatif = toNum(sumRows[ROW_EXCL_ASURANSI]?.[COL_REALISASI]);    // P12
-      const pctSerapan = sumRows[ROW_EXCL_ASURANSI]?.[COL_PCT_SERAPAN];         // T12 (raw)
+  /* Timestamp */
+  const now=new Date();
+  document.getElementById('last-updated').textContent=
+    'Data diperbarui: '+
+    now.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})+
+    ' '+now.toLocaleTimeString('id-ID');
 
-      // ── Ambil nilai dari AnggaranRealisasi2026 ──────────────────
-      const arOutstanding = toNum(arRows[AR_ROW_TOTAL]?.[AR_COL_OUTSTANDING]);     // Y2
-      const arRealisasi = toNum(arRows[AR_ROW_TOTAL]?.[AR_COL_REALISASI]);       // Z2
+  /* ── Slide 1 ── */
+  const sv=(id,v)=>{
+    const el=document.getElementById(id);
+    el.textContent=v;
+  };
+  sv('s1-pagu-excl',fmt(paguExcl));
+  sv('s1-realisasi',fmt(arReal));
+  sv('s1-outstanding',fmt(arOut));
+  sv('s1-persen',fmtP(pctSer));
 
-      // ── Data per akun (baris 3–10, index 2–9) ──────────────────
-      const akunData = [];
-      for (let i = 2; i <= 9; i++) {
-        const r = sumRows[i];
-        if (!r || (!r[0] && !r[1])) continue;
-        akunData.push({
-          akun: r[0],
-          uraian: r[1],
-          pagu: toNum(r[COL_PAGU]),
-          bulan: MONTHS.map((_, mi) => toNum(r[COL_JAN + mi])),
-          real: toNum(r[COL_REALISASI]),
-          sisa: toNum(r[COL_SISA]),
-          out: toNum(r[COL_OUTSTANDING]),
-          pct: r[COL_PCT_SERAPAN]
-        });
-      }
+  /* ── Slide 2 ── */
+  document.getElementById('s2-incl').textContent=fmt(paguIncl);
+  document.getElementById('s2-asuransi').textContent=fmt(paguAsr);
+  document.getElementById('s2-asuransi-pct').textContent=
+    pct(paguAsr,paguIncl).toFixed(1)+'% dari total pagu';
+  document.getElementById('s2-excl').textContent=fmt(paguExcl);
+  document.getElementById('s2-real').textContent=fmt(realKum);
+  document.getElementById('s2-real-pct').textContent=
+    'Serapan '+pct(realKum,paguExcl).toFixed(2)+'%';
 
-      // Timestamp
-      const now = new Date();
-      document.getElementById('last-updated').textContent =
-        'Data diperbarui: ' + now.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) +
-        ' ' + now.toLocaleTimeString('id-ID');
+  /* ── Slide 3: Bar Chart ── */
+  const totBln=MONTHS.map((_,mi)=>
+    akunData.filter(d=>String(d.akun)!=='523113').reduce((s,d)=>s+d.bulan[mi],0)
+  );
+  const maxV=Math.max(...totBln,1);
 
-      // ══ SLIDE 1 ══
-      document.getElementById('s1-pagu-excl').textContent = fmt(paguExcl);
-      document.getElementById('s1-realisasi').textContent = fmt(arRealisasi);
-      document.getElementById('s1-outstanding').textContent = fmt(arOutstanding);
-      document.getElementById('s1-persen').textContent = fmtPct(pctSerapan);
-
-      // ══ SLIDE 2 ══
-      document.getElementById('s2-incl').textContent = fmt(paguIncl);
-      document.getElementById('s2-asuransi').textContent = fmt(paguAsuransi);
-      document.getElementById('s2-asuransi-pct').textContent =
-        pctNum(paguAsuransi, paguIncl).toFixed(1) + '% dari total pagu';
-      document.getElementById('s2-excl').textContent = fmt(paguExcl);
-      document.getElementById('s2-real').textContent = fmt(realKumulatif);
-      document.getElementById('s2-real-pct').textContent =
-        'Serapan ' + pctNum(realKumulatif, paguExcl).toFixed(2) + '%';
-
-      // ══ SLIDE 3: BAR CHART ══
-      const totalBulan = MONTHS.map((_, mi) =>
-        akunData.filter(d => String(d.akun) !== '523113').reduce((s, d) => s + d.bulan[mi], 0)
-      );
-      const maxVal = Math.max(...totalBulan, 1);
-      const barsHtml = totalBulan.map((v, i) => {
-        const h = Math.max(2, Math.round((v / maxVal) * 140));
-        const pStr = pctNum(v, paguExcl).toFixed(1) + '%';
-        const col = v > 0 ? MONTH_COLORS[i] : 'rgba(255,255,255,0.08)';
-        return `<div class="month-col">
+  document.getElementById('month-bars').innerHTML=totBln.map((v,i)=>{
+    const tH=Math.max(2,Math.round((v/maxV)*132));
+    const ps=pct(v,paguExcl).toFixed(1)+'%';
+    const col=v>0?MC[i]:'rgba(255,255,255,.07)';
+    return`<div class="month-col">
       <div class="bar-wrap">
-        <div class="bar" style="height:${h}px;background:linear-gradient(180deg,${col},${col}bb);">
-          ${v > 0 ? pStr : ''}
+        <div class="bar" id="bar-${i}"
+          style="height:0;background:linear-gradient(180deg,${col},${col}99)"
+          data-target="${tH}"
+          data-tip="${MONTHS[i]}: ${fmt(v)} (${ps})">
+          ${v>0?ps:''}
         </div>
       </div>
-      <div class="month-lbl">${MONTHS[i].substring(0, 3)}</div>
-      <div class="month-amt">${v > 0 ? fmt(v) : '—'}</div>
+      <div class="month-lbl">${MS[i]}</div>
+      <div class="month-amt">${v>0?fmt(v):'—'}</div>
     </div>`;
-      }).join('');
-      document.getElementById('month-bars').innerHTML = barsHtml;
+  }).join('');
 
-      // Cards 3 bulan aktif terakhir
-      const active = totalBulan.map((v, i) => ({ v, i })).filter(x => x.v > 0).slice(-3);
-      const cColors = ['blue', 'gold', 'green'];
-      document.getElementById('month-cards').innerHTML = active.length
-        ? active.map((m, ci) => `
-        <div class="card ${cColors[ci]}" style="padding:14px;">
-          <div class="card-lbl">REALISASI ${MONTHS[m.i].toUpperCase()}</div>
-          <div class="card-val ${cColors[ci]}" style="font-size:17px;">${fmtFull(m.v)}</div>
-          <div class="card-note">${pctNum(m.v, paguExcl).toFixed(2)}% dari pagu operasional</div>
-        </div>`).join('')
-        : '<div style="color:rgba(255,255,255,0.3);font-size:13px;">Belum ada realisasi</div>';
+  window._bars=()=>totBln.forEach((_,i)=>{
+    const el=document.getElementById('bar-'+i);
+    if(el)el.style.height=el.dataset.target+'px';
+  });
 
-      // ══ SLIDE 4: TABEL PER AKUN ══
-      const operasional = akunData.filter(d => String(d.akun) !== '523113');
-      document.getElementById('akun-tbody').innerHTML = operasional.map(d => {
-        const p = pctNum(d.real, d.pagu);
-        return `<tr>
+  const active=totBln.map((v,i)=>({v,i})).filter(x=>x.v>0).slice(-3);
+  const cc=['blue','gold','green'];
+  document.getElementById('month-cards').innerHTML=active.length
+    ?active.map((m,ci)=>`
+      <div class="card ${cc[ci]}" style="padding:12px">
+        <div class="card-lbl">REALISASI ${MONTHS[m.i].toUpperCase()}</div>
+        <div class="card-val ${cc[ci]}" style="font-size:15px">${fmtF(m.v)}</div>
+        <div class="card-note">${pct(m.v,paguExcl).toFixed(2)}% dari pagu operasional</div>
+      </div>`).join('')
+    :'<div style="color:var(--muted);font-size:12px">Belum ada realisasi</div>';
+
+  /* ── Slide 4: Tabel ── */
+  const ops=akunData.filter(d=>String(d.akun)!=='523113');
+  document.getElementById('akun-tbody').innerHTML=ops.map(d=>{
+    const p=pct(d.real,d.pagu);
+    return`<tr title="${d.uraian} — Serapan ${p.toFixed(2)}%">
       <td><span class="akun-badge">${d.akun}</span></td>
       <td>${d.uraian}</td>
-      <td class="right">${fmtFull(d.pagu)}</td>
-      <td class="right">${fmtFull(d.real)}</td>
-      <td class="right">${fmtFull(d.out)}</td>
-      <td class="right">${fmtFull(d.sisa)}</td>
-      <td class="right"><span class="pct-pill ${pctClass(p)}">${p.toFixed(1)}%</span></td>
+      <td class="r">${fmtF(d.pagu)}</td>
+      <td class="r">${fmtF(d.real)}</td>
+      <td class="r">${fmtF(d.out)}</td>
+      <td class="r">${fmtF(d.sisa)}</td>
+      <td class="r"><span class="pct-pill ${pcls(p)}">${p.toFixed(1)}%</span></td>
     </tr>`;
-      }).join('');
+  }).join('');
 
-      const totPagu = operasional.reduce((s, d) => s + d.pagu, 0);
-      const totReal = operasional.reduce((s, d) => s + d.real, 0);
-      const totOut = operasional.reduce((s, d) => s + d.out, 0);
-      const totSisa = operasional.reduce((s, d) => s + d.sisa, 0);
-      document.getElementById('akun-tfoot').innerHTML = `<tr>
+  const tP=ops.reduce((s,d)=>s+d.pagu,0);
+  const tR=ops.reduce((s,d)=>s+d.real,0);
+  const tO=ops.reduce((s,d)=>s+d.out,0);
+  const tS=ops.reduce((s,d)=>s+d.sisa,0);
+
+  document.getElementById('akun-tfoot').innerHTML=`<tr>
     <td colspan="2">TOTAL OPERASIONAL (EXCL. ASURANSI)</td>
-    <td class="right">${fmtFull(totPagu)}</td>
-    <td class="right">${fmtFull(totReal)}</td>
-    <td class="right">${fmtFull(totOut)}</td>
-    <td class="right">${fmtFull(totSisa)}</td>
-    <td class="right">${pctNum(totReal, totPagu).toFixed(1)}%</td>
+    <td class="r">${fmtF(tP)}</td>
+    <td class="r">${fmtF(tR)}</td>
+    <td class="r">${fmtF(tO)}</td>
+    <td class="r">${fmtF(tS)}</td>
+    <td class="r">${pct(tR,tP).toFixed(1)}%</td>
   </tr>`;
 
-      // ══ SLIDE 5: PROGRESS BARS ══
-      document.getElementById('progress-bars').innerHTML = operasional.map(d => {
-        const p = pctNum(d.real, d.pagu);
-        const w = Math.min(Math.max(p, 0.3), 100);
-        const fill = p >= 80 ? 'linear-gradient(90deg,#2ecc71,#27ae60)'
-          : p >= 40 ? 'linear-gradient(90deg,#f39c12,#d35400)'
-            : p > 0 ? 'linear-gradient(90deg,#e74c3c,#c0392b)'
-              : 'rgba(255,255,255,0.12)';
-        return `<div class="prog-row">
-      <div class="prog-header">
-        <span class="prog-name">${d.akun} · ${d.uraian}</span>
-        <span class="prog-vals">${fmt(d.real)} / ${fmt(d.pagu)} &nbsp;|&nbsp; <strong>${p.toFixed(1)}%</strong></span>
-      </div>
-      <div class="prog-bar"><div class="prog-fill" style="width:${w}%;background:${fill};"></div></div>
-    </div>`;
-      }).join('') + `
-  <div class="prog-row" style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.1);">
+  /* ── Slide 5: Progress ── */
+  document.getElementById('progress-bars').innerHTML=
+    ops.map(d=>{
+      const p=pct(d.real,d.pagu);
+      const w=Math.min(Math.max(p,.3),100);
+      const fill=p>=80?'linear-gradient(90deg,#2ecc71,#27ae60)'
+                :p>=40?'linear-gradient(90deg,#f39c12,#d35400)'
+                :p>0  ?'linear-gradient(90deg,#e74c3c,#c0392b)'
+                       :'rgba(255,255,255,.09)';
+      return`<div class="prog-row">
+        <div class="prog-header">
+          <span class="prog-name">${d.akun} · ${d.uraian}</span>
+          <span class="prog-vals">${fmt(d.real)} / ${fmt(d.pagu)} &nbsp;|&nbsp;
+            <strong>${p.toFixed(1)}%</strong></span>
+        </div>
+        <div class="prog-bar">
+          <div class="prog-fill" data-w="${w}" style="background:${fill}"></div>
+        </div>
+      </div>`;
+    }).join('')+`
+  <div class="prog-row" style="margin-top:13px;padding-top:11px;border-top:1px solid rgba(255,255,255,.08)">
     <div class="prog-header">
-      <span class="prog-name" style="font-weight:700;color:#f0a500;">TOTAL OPERASIONAL</span>
-      <span class="prog-vals" style="color:#f0a500;">${fmt(totReal)} / ${fmt(totPagu)} &nbsp;|&nbsp;
-        <strong>${pctNum(totReal, totPagu).toFixed(1)}%</strong></span>
+      <span class="prog-name" style="font-weight:700;color:var(--gold)">TOTAL OPERASIONAL</span>
+      <span class="prog-vals" style="color:var(--gold)">${fmt(tR)} / ${fmt(tP)} &nbsp;|&nbsp;
+        <strong>${pct(tR,tP).toFixed(1)}%</strong></span>
     </div>
-    <div class="prog-bar" style="height:12px;">
-      <div class="prog-fill" style="width:${Math.max(pctNum(totReal, totPagu), 0.3)}%;
-        background:linear-gradient(90deg,#f0a500,#e67e22);"></div>
+    <div class="prog-bar" style="height:11px">
+      <div class="prog-fill" data-w="${Math.max(pct(tR,tP),.3)}"
+        style="background:linear-gradient(90deg,var(--gold),#e67e22)"></div>
     </div>
   </div>`;
 
-      // ══ SLIDE 6: RPD TRIWULAN I ══
-      // Mapping baris (0-based): baris 15=index 14, 16=15, 17=16, 18=17, 19=18
-      // Kolom: C=2(SEMULA), G=6(REVISI RPD-TWI), H=7(REALISASI TWI), I=8(%SERAPAN)
-      const bagianDef = [
-        { no: '71', bagian: 'Pengembangan Strategi dan Kinerja', row: 14 },
-        { no: '72', bagian: 'Perencanaan BMN', row: 15 },
-        { no: '73', bagian: 'Pengelolaan BMN', row: 16 },
-        { no: '74', bagian: 'Penatausahaan BMN', row: 17 },
-        { no: '75', bagian: 'Manajemen Pengadaan', row: 18 },
-      ];
+  window._bars5=()=>{
+    document.querySelectorAll('#progress-bars .prog-fill').forEach(el=>{
+      el.style.width=el.dataset.w+'%';
+    });
+  };
 
-      const bagianRows = bagianDef.map(b => {
-        const r = sumRows[b.row] || [];
-        const semula = toNum(r[2]);   // C
-        const revisi = toNum(r[6]);   // G
-        const real = toNum(r[7]);   // H
-        const pct = r[8];          // I (raw, bisa desimal atau persen)
-        return { ...b, semula, revisi, real, pct };
-      });
+  /* ── Slide 6: RPD ── */
+  const bagRows=BAGIAN.map(b=>{
+    const r=sumRows[b.row]||[];
+    return{...b,semula:toNum(r[2]),revisi:toNum(r[6]),real:toNum(r[7]),pct:r[8]};
+  });
+  const tSem=bagRows.reduce((s,b)=>s+b.semula,0);
+  const tRev=bagRows.reduce((s,b)=>s+b.revisi,0);
+  const tR6 =bagRows.reduce((s,b)=>s+b.real,0);
+  const tP6 =tRev>0?(tR6/tRev)*100:0;
 
-      // Total
-      const totSemula = bagianRows.reduce((s, b) => s + b.semula, 0);
-      const totRevisi = bagianRows.reduce((s, b) => s + b.revisi, 0);
-      const totReal6 = bagianRows.reduce((s, b) => s + b.real, 0);
-      const totPct6 = totRevisi > 0 ? (totReal6 / totRevisi) * 100 : 0;
-
-      document.getElementById('bagian-tbody').innerHTML = bagianRows.map(b => {
-        const pctVal = Math.abs(toNum(b.pct)) <= 1
-          ? toNum(b.pct) * 100
-          : toNum(b.pct);
-        return `<tr>
-      <td>${b.no}</td>
-      <td>${b.bagian}</td>
-      <td class="right">${fmtFull(b.semula)}</td>
-      <td class="right">${fmtFull(b.revisi)}</td>
-      <td class="right">${fmtFull(b.real)}</td>
-      <td class="right">
-        <span class="pct-pill ${pctClass(pctVal)}">${pctVal.toFixed(2)}%</span>
-      </td>
+  document.getElementById('bagian-tbody').innerHTML=bagRows.map(b=>{
+    const pv=Math.abs(toNum(b.pct))<=1?toNum(b.pct)*100:toNum(b.pct);
+    return`<tr>
+      <td>${b.no}</td><td>${b.bagian}</td>
+      <td class="r">${fmtF(b.semula)}</td>
+      <td class="r">${fmtF(b.revisi)}</td>
+      <td class="r">${fmtF(b.real)}</td>
+      <td class="r"><span class="pct-pill ${pcls(pv)}">${pv.toFixed(2)}%</span></td>
     </tr>`;
-      }).join('');
-
-      document.getElementById('bagian-tfoot').innerHTML = `<tr>
+  }).join('');
+  document.getElementById('bagian-tfoot').innerHTML=`<tr>
     <td colspan="2">TOTAL</td>
-    <td class="right">${fmtFull(totSemula)}</td>
-    <td class="right">${fmtFull(totRevisi)}</td>
-    <td class="right">${fmtFull(totReal6)}</td>
-    <td class="right">${totPct6.toFixed(2)}%</td>
+    <td class="r">${fmtF(tSem)}</td>
+    <td class="r">${fmtF(tRev)}</td>
+    <td class="r">${fmtF(tR6)}</td>
+    <td class="r">${tP6.toFixed(2)}%</td>
   </tr>`;
 
-      // ══ SLIDE 7: KESIMPULAN (auto-generate dari data aktual) ══
-      const topAkun = [...operasional].sort((a, b) => pctNum(b.real, b.pagu) - pctNum(a.real, a.pagu))[0];
-      const zeroAkun = operasional.filter(d => d.real === 0);
-      const lowAkun = operasional.find(d => d.pagu > 100e6 && pctNum(d.real, d.pagu) < 20);
-      const pctTotal = pctNum(totReal, totPagu);
-      const lastActive = MONTHS.reduce((last, m, i) =>
-        totalBulan[i] > 0 ? i : last, -1);
+  /* ── Slide 7: Kesimpulan ── */
+  const top =ops.sort((a,b)=>pct(b.real,b.pagu)-pct(a.real,a.pagu))[0];
+  const zero=ops.filter(d=>d.real===0);
+  const low =ops.find(d=>d.pagu>100e6&&pct(d.real,d.pagu)<20);
+  const pT  =pct(tR,tP);
+  const lastA=MONTHS.reduce((l,_,i)=>totBln[i]>0?i:l,-1);
 
-      let pts = `
-  <div class="point">
-    <div class="point-icon">📉</div>
-    <div class="point-text">
-      <strong>Serapan Kumulatif — ${pctTotal.toFixed(2)}%</strong>
-      <p>Dari pagu operasional ${fmt(paguExcl)}, telah terealisasi ${fmt(totReal)}
-      ${lastActive >= 0 ? ' s.d. ' + MONTHS[lastActive] + ' 2026' : ''}.
-      Realisasi outstanding tercatat ${fmt(arOutstanding)}.</p>
-    </div>
-  </div>`;
+  let pts=`
+  <div class="point"><div class="point-icon">📉</div><div class="point-text">
+    <strong>Serapan Kumulatif — ${pT.toFixed(2)}%</strong>
+    <p>Dari pagu operasional ${fmt(paguExcl)}, telah terealisasi ${fmt(tR)}
+    ${lastA>=0?' s.d. '+MONTHS[lastA]+' 2026':''}.
+    Realisasi outstanding tercatat ${fmt(arOut)}.</p>
+  </div></div>`;
 
-      if (topAkun) {
-        pts += `
-  <div class="point">
-    <div class="point-icon">🏆</div>
-    <div class="point-text">
-      <strong>Akun Paling Progresif — ${topAkun.akun}</strong>
-      <p>${topAkun.uraian} telah terserap ${pctNum(topAkun.real, topAkun.pagu).toFixed(1)}%
-      (${fmt(topAkun.real)}) — tertinggi dibanding akun lain.</p>
-    </div>
-  </div>`;
-      }
-      if (lowAkun) {
-        pts += `
-  <div class="point">
-    <div class="point-icon">⚡</div>
-    <div class="point-text">
-      <strong>Perlu Akselerasi — ${lowAkun.akun}</strong>
-      <p>${lowAkun.uraian} baru terserap ${pctNum(lowAkun.real, lowAkun.pagu).toFixed(1)}%
-      dari pagu ${fmt(lowAkun.pagu)} — perlu percepatan segera.</p>
-    </div>
-  </div>`;
-      }
-      if (zeroAkun.length > 0) {
-        pts += `
-  <div class="point">
-    <div class="point-icon">⚠️</div>
-    <div class="point-text">
-      <strong>${zeroAkun.length} Akun Belum Ada Realisasi</strong>
-      <p>${zeroAkun.map(d => d.akun + ' (' + d.uraian + ')').join(', ')} —
-      perlu monitoring dan percepatan pelaksanaan kegiatan.</p>
-    </div>
-  </div>`;
-      }
-      document.getElementById('kesimpulan-points').innerHTML = pts;
+  if(top)pts+=`
+  <div class="point"><div class="point-icon">🏆</div><div class="point-text">
+    <strong>Akun Paling Progresif — ${top.akun}</strong>
+    <p>${top.uraian} telah terserap ${pct(top.real,top.pagu).toFixed(1)}%
+    (${fmt(top.real)}) — tertinggi dibanding akun lain.</p>
+  </div></div>`;
+
+  if(low)pts+=`
+  <div class="point"><div class="point-icon">⚡</div><div class="point-text">
+    <strong>Perlu Akselerasi — ${low.akun}</strong>
+    <p>${low.uraian} baru terserap ${pct(low.real,low.pagu).toFixed(1)}%
+    dari pagu ${fmt(low.pagu)} — perlu percepatan segera.</p>
+  </div></div>`;
+
+  if(zero.length)pts+=`
+  <div class="point"><div class="point-icon">⚠️</div><div class="point-text">
+    <strong>${zero.length} Akun Belum Ada Realisasi</strong>
+    <p>${zero.map(d=>d.akun+' ('+d.uraian+')').join(', ')} —
+    perlu monitoring dan percepatan kegiatan.</p>
+  </div></div>`;
+
+  document.getElementById('kesimpulan-points').innerHTML=pts;
+}
+
+/* ══════════════════════════════════════════
+   LOAD DATA
+══════════════════════════════════════════ */
+async function loadData(){
+  if(loading)return;
+  loading=true;
+  const scr=document.getElementById('init-screen');
+  const sta=document.getElementById('init-status');
+  const btn=document.getElementById('btn-ref');
+  scr.classList.remove('hide','fade-out');
+  btn.disabled=true;btn.textContent='⏳';
+  try{
+    sta.textContent='Mengambil data secara paralel...';
+    const[sumRows,arRows]=await Promise.all([
+      fetchSheet('Summary2026'),
+      fetchSheet('AnggaranRealisasi2026')
+    ]);
+    sta.textContent='Memproses data...';
+    render(sumRows,arRows);
+    scr.classList.add('fade-out');
+    setTimeout(()=>scr.classList.add('hide'),420);
+    toast('✅ Data berhasil diperbarui','ok');
+    clearTimeout(arTimer);
+    arTimer=setTimeout(()=>{toast('🔄 Auto-refresh...','info',2500);loadData();},CFG.AUTO_MS);
+  }catch(e){
+    scr.classList.add('fade-out');
+    setTimeout(()=>scr.classList.add('hide'),420);
+    toast('⚠️ Gagal: '+e.message+' — klik 🔄 coba lagi','err',7000);
+    console.error(e);
+  }finally{
+    loading=false;
+    btn.disabled=false;btn.textContent='🔄 Refresh';
+    showSlide(cur);
+  }
+}
+
+/* ══════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════ */
+function buildDots(){
+  document.getElementById('nav-dots').innerHTML=
+    slides.map((_,i)=>
+      `<button class="nav-dot${i===0?' active':''}"
+        onclick="go(${i})" title="Slide ${i+1}"></button>`
+    ).join('');
+}
+
+function showSlide(n){
+  /* Hide all first */
+  slides.forEach((s,i)=>{
+    if(i!==n){
+      s.classList.remove('active');
+      /* After transition, set display:none */
+      setTimeout(()=>{if(!s.classList.contains('active'))s.style.display='none';},380);
     }
+  });
+  /* Show target */
+  slides[n].style.display='flex';
+  void slides[n].offsetWidth; /* reflow for transition */
+  slides[n].classList.add('active');
 
-    // ══════════════════════════════════════════════
-    // LOAD DATA
-    // ══════════════════════════════════════════════
-    async function loadData() {
-      const screen = document.getElementById('init-screen');
-      const status = document.getElementById('init-status');
-      screen.classList.remove('hide');
+  /* Nav state */
+  document.getElementById('nav-info').textContent=`${n+1} / ${TOTAL}`;
+  document.getElementById('btn-prev').disabled=n===0;
+  document.getElementById('btn-next').disabled=n===TOTAL-1;
+  document.querySelectorAll('.nav-dot').forEach((d,i)=>
+    d.classList.toggle('active',i===n));
 
-      try {
-        status.textContent = 'Mengambil Summary2026...';
-        const sumRows = await fetchSheet('Summary2026');
+  /* Slide-specific animations */
+  if(n===2)setTimeout(()=>window._bars?.(),200);
+  if(n===4)setTimeout(()=>window._bars5?.(),200);
+}
 
-        status.textContent = 'Mengambil AnggaranRealisasi2026...';
-        const arRows = await fetchSheet('AnggaranRealisasi2026');
+function go(n){cur=Math.max(0,Math.min(TOTAL-1,n));showSlide(cur);}
+function nextSlide(){go(cur+1);}
+function prevSlide(){go(cur-1);}
 
-        status.textContent = 'Memproses data...';
-        renderAll(sumRows, arRows);
+/* Keyboard */
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT')return;
+  ({ArrowRight:nextSlide,ArrowDown:nextSlide,
+    ArrowLeft:prevSlide,ArrowUp:prevSlide,
+    Home:()=>go(0),End:()=>go(TOTAL-1)})[e.key]?.();
+  const n=parseInt(e.key);
+  if(n>=1&&n<=TOTAL){e.preventDefault();go(n-1);}
+});
 
-        screen.classList.add('hide');
-        showSlide(current);
-      } catch (err) {
-        screen.classList.add('hide');
-        const b = document.getElementById('error-banner');
-        b.textContent = '⚠️ Gagal memuat data: ' + err.message + '. Klik 🔄 untuk coba lagi.';
-        b.style.display = 'block';
-        setTimeout(() => b.style.display = 'none', 7000);
-        showSlide(current);
-        console.error(err);
-      }
-    }
+/* Swipe */
+let _tx=0,_ty=0;
+document.addEventListener('touchstart',e=>{
+  _tx=e.touches[0].clientX;_ty=e.touches[0].clientY;
+},{passive:true});
+document.addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-_tx;
+  const dy=e.changedTouches[0].clientY-_ty;
+  if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>48)
+    dx<0?nextSlide():prevSlide();
+},{passive:true});
 
-    // ══════════════════════════════════════════════
-    // NAVIGASI
-    // ══════════════════════════════════════════════
-    function showSlide(n) {
-      slides.forEach((s, i) => s.style.display = i === n ? 'flex' : 'none');
-      document.getElementById('nav-info').textContent = `${n + 1} / ${totalSlides}`;
-    }
-    function nextSlide() { if (current < totalSlides - 1) { current++; showSlide(current); } }
-    function prevSlide() { if (current > 0) { current--; showSlide(current); } }
-    document.addEventListener('keydown', e => {
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextSlide();
-      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') prevSlide();
+/* ══════════════════════════════════════════
+   PRINT
+══════════════════════════════════════════ */
+function printAll(){
+  /* Before print: show all slides, remove scale */
+  document.documentElement.style.setProperty('--sf','1');
+  slides.forEach(s=>{
+    s.style.display='flex';
+    s.style.opacity='1';
+    s.style.transform='none';
+  });
+  window.print();
+  /* Restore */
+  applyScale();
+  showSlide(cur);
+}
+
+/* ══════════════════════════════════════════
+   PDF
+══════════════════════════════════════════ */
+async function downloadPDF(){
+  const{jsPDF}=window.jspdf;
+  const ov=document.getElementById('pdf-ov');
+  const prog=document.getElementById('pdf-progress');
+  const bar=document.getElementById('pdf-bar-fill');
+  ov.classList.add('show');
+
+  /* Temporarily remove scale for accurate capture */
+  document.documentElement.style.setProperty('--sf','1');
+  const wrap=document.getElementById('slide-wrap');
+  wrap.style.marginBottom='0';
+
+  const saved=cur;
+  const pdf=new jsPDF({orientation:'landscape',unit:'px',format:[1280,720]});
+
+  for(let i=0;i<TOTAL;i++){
+    prog.textContent=`Memproses slide ${i+1} / ${TOTAL}`;
+    bar.style.width=((i/TOTAL)*100)+'%';
+
+    slides.forEach((s,idx)=>{
+      s.style.display=idx===i?'flex':'none';
+      s.style.opacity=idx===i?'1':'0';
+      s.style.transform='none';
     });
 
-    // ══════════════════════════════════════════════
-    // PRINT & PDF
-    // ══════════════════════════════════════════════
-    function printAll() {
-      slides.forEach(s => s.style.display = 'flex');
-      window.print();
-      showSlide(current);
-    }
+    /* Trigger animations for relevant slides */
+    if(i===2){window._bars?.();await new Promise(r=>setTimeout(r,850));}
+    else if(i===4){window._bars5?.();await new Promise(r=>setTimeout(r,850));}
+    else{await new Promise(r=>setTimeout(r,300));}
 
-    async function downloadPDF() {
-      const { jsPDF } = window.jspdf;
-      const ov = document.getElementById('pdf-overlay');
-      const prog = document.getElementById('pdf-progress');
-      ov.classList.add('show');
-      const saved = current;
-      const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [1280, 720] });
+    const canvas=await html2canvas(slides[i],{
+      scale:2,useCORS:true,backgroundColor:'#1a1a2e',
+      logging:false,width:1280,height:720,
+    });
+    if(i>0)pdf.addPage([1280,720],'landscape');
+    pdf.addImage(canvas.toDataURL('image/jpeg',.93),'JPEG',0,0,1280,720);
+  }
 
-      for (let i = 0; i < totalSlides; i++) {
-        prog.textContent = `Memproses slide ${i + 1} / ${totalSlides}`;
-        slides.forEach((s, idx) => s.style.display = idx === i ? 'flex' : 'none');
-        await new Promise(r => setTimeout(r, 350));
-        const canvas = await html2canvas(slides[i], {
-          scale: 2, useCORS: true, backgroundColor: null, logging: false, width: 1280, height: 720
-        });
-        if (i > 0) pdf.addPage([1280, 720], 'landscape');
-        pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, 1280, 720);
-      }
+  bar.style.width='100%';
+  prog.textContent='Menyimpan file...';
+  await new Promise(r=>setTimeout(r,280));
+  pdf.save('Anggaran_Romadan_TA2026.pdf');
 
-      prog.textContent = 'Menyimpan file...';
-      pdf.save('Anggaran_Romadan_TA2026.pdf');
-      ov.classList.remove('show');
-      showSlide(saved);
-    }
+  ov.classList.remove('show');
+  toast('📄 PDF berhasil disimpan','ok');
 
-    // ══════════════════════════════════════════════
-    // INIT
-    // ══════════════════════════════════════════════
-    loadData();
-  </script>
+  /* Restore scale */
+  applyScale();
+  showSlide(saved);
+}
+
+/* ══════════════════════════════════════════
+   INIT
+══════════════════════════════════════════ */
+buildDots();
+loadData();
+</script>
 </body>
-
 </html>
