@@ -1,582 +1,1219 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8">
   <title>Anggaran Romadan TA 2026</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family:'Segoe UI',sans-serif; background:#1a1a2e; color:white; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #1a1a2e;
+      color: white;
+    }
+
+    #init-screen {
+      position: fixed;
+      inset: 0;
+      background: #1a1a2e;
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    #init-screen.hide {
+      display: none;
+    }
+
+    .spinner {
+      width: 52px;
+      height: 52px;
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-top-color: #f0a500;
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    #init-screen p {
+      font-size: 16px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    #init-screen .sub {
+      font-size: 13px;
+      color: #f0a500;
+    }
+
+    #error-banner {
+      display: none;
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #e74c3c;
+      color: white;
+      padding: 12px 28px;
+      border-radius: 10px;
+      font-size: 14px;
+      z-index: 99998;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    #pdf-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.88);
+      z-index: 9999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+    }
+
+    #pdf-overlay.show {
+      display: flex;
+    }
+
+    #pdf-overlay p {
+      font-size: 16px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    #pdf-overlay .prog-text {
+      font-size: 13px;
+      color: #f0a500;
+    }
 
     .slide {
-      width:1280px; height:720px;
-      margin:20px auto; padding:55px 60px;
-      display:flex; flex-direction:column; justify-content:center;
-      page-break-after:always; position:relative; overflow:hidden;
+      width: 1280px;
+      height: 720px;
+      margin: 20px auto;
+      padding: 55px 60px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      page-break-after: always;
+      position: relative;
+      overflow: hidden;
     }
 
-    /* COVER */
     .slide-cover {
-      background:linear-gradient(135deg,#0f3460 0%,#16213e 50%,#0f3460 100%);
-      align-items:center; text-align:center;
+      background: linear-gradient(135deg, #0f3460 0%, #16213e 50%, #0f3460 100%);
+      align-items: center;
+      text-align: center;
     }
+
     .slide-cover::before {
-      content:''; position:absolute; width:600px; height:600px; border-radius:50%;
-      background:rgba(255,255,255,0.03); top:-200px; right:-100px;
+      content: '';
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.03);
+      top: -200px;
+      right: -100px;
     }
+
+    .slide-dark {
+      background: linear-gradient(135deg, #16213e 0%, #1a1a2e 100%);
+    }
+
     .badge {
-      background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2);
-      padding:8px 24px; border-radius:20px; font-size:13px; letter-spacing:2px;
-      margin-bottom:28px; display:inline-block;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 8px 24px;
+      border-radius: 20px;
+      font-size: 13px;
+      letter-spacing: 2px;
+      margin-bottom: 24px;
+      display: inline-block;
     }
-    .cover-title { font-size:50px; font-weight:700; line-height:1.2; margin-bottom:14px; }
-    .cover-title span { color:#f0a500; }
-    .cover-sub { font-size:18px; color:rgba(255,255,255,0.6); margin-bottom:40px; }
-    .cover-boxes { display:flex; gap:20px; justify-content:center; }
-    .cover-box { padding:18px 36px; border-radius:12px; text-align:center; }
-    .cover-box.gold { background:linear-gradient(135deg,#f0a500,#e67e22); }
-    .cover-box.teal { background:linear-gradient(135deg,#00b894,#00796b); }
-    .cover-box.blue2 { background:linear-gradient(135deg,#3498db,#2980b9); }
-    .cover-box .lbl { font-size:11px; opacity:.85; letter-spacing:1px; margin-bottom:4px; }
-    .cover-box .amt { font-size:28px; font-weight:700; }
 
-    /* COMMON */
-    .slide-dark { background:linear-gradient(135deg,#16213e 0%,#1a1a2e 100%); }
-    .stitle { font-size:13px; letter-spacing:3px; color:#f0a500; text-transform:uppercase; margin-bottom:8px; }
-    .sheading { font-size:32px; font-weight:700; margin-bottom:18px; }
-    .divider { width:50px; height:4px; background:#f0a500; border-radius:2px; margin-bottom:28px; }
-    .footer-slide { position:absolute; bottom:20px; right:36px; font-size:11px; color:rgba(255,255,255,0.2); }
+    .cover-title {
+      font-size: 44px;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
 
-    /* CARDS */
-    .cards { display:flex; gap:20px; }
+    .cover-title span {
+      color: #f0a500;
+    }
+
+    .cover-sub {
+      font-size: 16px;
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 32px;
+    }
+
+    .cover-boxes {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .cover-box {
+      padding: 16px 26px;
+      border-radius: 12px;
+      text-align: center;
+      min-width: 180px;
+    }
+
+    .cover-box.gold {
+      background: linear-gradient(135deg, #f0a500, #e67e22);
+    }
+
+    .cover-box.teal {
+      background: linear-gradient(135deg, #00b894, #00796b);
+    }
+
+    .cover-box.blue2 {
+      background: linear-gradient(135deg, #3498db, #2980b9);
+    }
+
+    .cover-box.purple {
+      background: linear-gradient(135deg, #9b59b6, #8e44ad);
+    }
+
+    .cover-box .lbl {
+      font-size: 10px;
+      opacity: .85;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    .cover-box .amt {
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .stitle {
+      font-size: 13px;
+      letter-spacing: 3px;
+      color: #f0a500;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .sheading {
+      font-size: 30px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .divider {
+      width: 50px;
+      height: 4px;
+      background: #f0a500;
+      border-radius: 2px;
+      margin-bottom: 22px;
+    }
+
+    .footer-slide {
+      position: absolute;
+      bottom: 18px;
+      right: 36px;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.2);
+    }
+
+    .ts-label {
+      position: absolute;
+      bottom: 18px;
+      left: 36px;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.25);
+    }
+
+    .cards {
+      display: flex;
+      gap: 16px;
+    }
+
     .card {
-      flex:1; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
-      border-radius:14px; padding:24px; position:relative; overflow:hidden;
+      flex: 1;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 22px;
+      position: relative;
+      overflow: hidden;
     }
-    .card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
-    .card.gold::before { background:linear-gradient(90deg,#f0a500,#e67e22); }
-    .card.blue::before { background:linear-gradient(90deg,#3498db,#2980b9); }
-    .card.green::before { background:linear-gradient(90deg,#2ecc71,#27ae60); }
-    .card.red::before { background:linear-gradient(90deg,#e74c3c,#c0392b); }
-    .card-icon { font-size:30px; margin-bottom:12px; }
-    .card-lbl { font-size:11px; color:rgba(255,255,255,0.5); margin-bottom:6px; letter-spacing:1px; }
-    .card-val { font-size:24px; font-weight:700; }
-    .card-val.gold { color:#f0a500; }
-    .card-val.blue { color:#3498db; }
-    .card-val.green { color:#2ecc71; }
-    .card-val.red { color:#e74c3c; }
-    .card-note { font-size:11px; color:rgba(255,255,255,0.4); margin-top:6px; }
 
-    /* PROGRESS */
-    .progress-section { margin-top:8px; }
-    .prog-row { margin-bottom:16px; }
-    .prog-header { display:flex; justify-content:space-between; margin-bottom:6px; }
-    .prog-name { font-size:13px; color:rgba(255,255,255,0.75); }
-    .prog-vals { font-size:12px; color:rgba(255,255,255,0.5); }
-    .prog-bar { height:8px; background:rgba(255,255,255,0.08); border-radius:4px; overflow:hidden; }
-    .prog-fill { height:100%; border-radius:4px; }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+    }
 
-    /* TABLE */
-    table { width:100%; border-collapse:collapse; }
-    thead tr { background:rgba(240,165,0,0.12); border-bottom:2px solid #f0a500; }
-    thead th { padding:11px 14px; font-size:12px; letter-spacing:1px; color:#f0a500; text-align:left; }
-    thead th.right { text-align:right; }
-    tbody tr { border-bottom:1px solid rgba(255,255,255,0.05); }
-    tbody td { padding:10px 14px; font-size:13px; color:rgba(255,255,255,0.75); }
-    tbody td.right { text-align:right; font-weight:600; color:white; }
-    tfoot tr { background:rgba(240,165,0,0.1); border-top:2px solid #f0a500; }
-    tfoot td { padding:12px 14px; font-weight:700; color:#f0a500; font-size:13px; }
-    tfoot td.right { text-align:right; }
+    .card.gold::before {
+      background: linear-gradient(90deg, #f0a500, #e67e22);
+    }
+
+    .card.blue::before {
+      background: linear-gradient(90deg, #3498db, #2980b9);
+    }
+
+    .card.green::before {
+      background: linear-gradient(90deg, #2ecc71, #27ae60);
+    }
+
+    .card.red::before {
+      background: linear-gradient(90deg, #e74c3c, #c0392b);
+    }
+
+    .card.purple::before {
+      background: linear-gradient(90deg, #9b59b6, #8e44ad);
+    }
+
+    .card-icon {
+      font-size: 26px;
+      margin-bottom: 10px;
+    }
+
+    .card-lbl {
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 5px;
+      letter-spacing: 1px;
+    }
+
+    .card-val {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .card-val.gold {
+      color: #f0a500;
+    }
+
+    .card-val.blue {
+      color: #3498db;
+    }
+
+    .card-val.green {
+      color: #2ecc71;
+    }
+
+    .card-val.red {
+      color: #e74c3c;
+    }
+
+    .card-val.purple {
+      color: #9b59b6;
+    }
+
+    .card-note {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.4);
+      margin-top: 5px;
+    }
+
+    .prog-row {
+      margin-bottom: 13px;
+    }
+
+    .prog-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+
+    .prog-name {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.75);
+    }
+
+    .prog-vals {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .prog-bar {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .prog-fill {
+      height: 100%;
+      border-radius: 4px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead tr {
+      background: rgba(240, 165, 0, 0.12);
+      border-bottom: 2px solid #f0a500;
+    }
+
+    thead th {
+      padding: 10px 12px;
+      font-size: 12px;
+      letter-spacing: 1px;
+      color: #f0a500;
+      text-align: left;
+    }
+
+    thead th.right {
+      text-align: right;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    tbody tr:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    tbody td {
+      padding: 9px 12px;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.75);
+    }
+
+    tbody td.right {
+      text-align: right;
+      font-weight: 600;
+      color: white;
+    }
+
+    tfoot tr {
+      background: rgba(240, 165, 0, 0.1);
+      border-top: 2px solid #f0a500;
+    }
+
+    tfoot td {
+      padding: 11px 12px;
+      font-weight: 700;
+      color: #f0a500;
+      font-size: 13px;
+    }
+
+    tfoot td.right {
+      text-align: right;
+    }
+
     .akun-badge {
-      background:rgba(255,255,255,0.08); padding:2px 8px;
-      border-radius:5px; font-size:11px; font-family:monospace;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 2px 7px;
+      border-radius: 5px;
+      font-size: 11px;
+      font-family: monospace;
     }
-    .pct-pill { display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700; }
-    .pct-pill.low { background:rgba(231,76,60,0.2); color:#e74c3c; }
-    .pct-pill.mid { background:rgba(243,156,18,0.2); color:#f39c12; }
-    .pct-pill.high { background:rgba(46,204,113,0.2); color:#2ecc71; }
 
-    /* MONTHLY BARS */
-    .month-bars { display:flex; gap:16px; align-items:flex-end; height:220px; margin-top:10px; }
-    .month-col { flex:1; display:flex; flex-direction:column; align-items:center; gap:8px; }
-    .bar-wrap { width:100%; display:flex; flex-direction:column; justify-content:flex-end; height:180px; }
+    .pct-pill {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .pct-pill.low {
+      background: rgba(231, 76, 60, 0.2);
+      color: #e74c3c;
+    }
+
+    .pct-pill.mid {
+      background: rgba(243, 156, 18, 0.2);
+      color: #f39c12;
+    }
+
+    .pct-pill.high {
+      background: rgba(46, 204, 113, 0.2);
+      color: #2ecc71;
+    }
+
+    .month-bars {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+      height: 190px;
+    }
+
+    .month-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .bar-wrap {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      height: 150px;
+    }
+
     .bar {
-      width:100%; border-radius:6px 6px 0 0;
-      display:flex; align-items:flex-end; justify-content:center;
-      padding-bottom:6px; font-size:11px; font-weight:700;
+      width: 100%;
+      border-radius: 6px 6px 0 0;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 4px;
+      font-size: 10px;
+      font-weight: 700;
     }
-    .month-lbl { font-size:13px; color:rgba(255,255,255,0.6); }
-    .month-amt { font-size:12px; font-weight:700; color:white; }
 
-    /* CLOSING */
-    .points { display:flex; flex-direction:column; gap:16px; }
+    .month-lbl {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .month-amt {
+      font-size: 10px;
+      font-weight: 700;
+      color: white;
+      text-align: center;
+    }
+
+    .points {
+      display: flex;
+      flex-direction: column;
+      gap: 13px;
+    }
+
     .point {
-      display:flex; align-items:flex-start; gap:18px;
-      background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
-      border-radius:10px; padding:16px 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 14px 18px;
     }
-    .point-icon { font-size:26px; flex-shrink:0; }
-    .point-text strong { display:block; font-size:15px; color:#f0a500; margin-bottom:3px; }
-    .point-text p { font-size:13px; color:rgba(255,255,255,0.65); line-height:1.5; }
 
-    /* NAV BAR */
+    .point-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .point-text strong {
+      display: block;
+      font-size: 14px;
+      color: #f0a500;
+      margin-bottom: 2px;
+    }
+
+    .point-text p {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.65);
+      line-height: 1.5;
+    }
+
     .nav {
-      position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
-      background:rgba(0,0,0,0.82); backdrop-filter:blur(12px);
-      padding:10px 18px; border-radius:40px;
-      display:flex; gap:8px; z-index:999; align-items:center;
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(12px);
+      padding: 9px 16px;
+      border-radius: 40px;
+      display: flex;
+      gap: 8px;
+      z-index: 999;
+      align-items: center;
     }
+
     .nav button {
-      border:1px solid rgba(255,255,255,0.2); color:white;
-      padding:7px 16px; border-radius:20px; cursor:pointer; font-size:12px;
-      background:rgba(255,255,255,0.1); transition:all .2s;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 6px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      transition: all .2s;
     }
-    .nav button:hover { background:#f0a500; color:#000; border-color:#f0a500; }
-    .nav button.pdf-btn { background:rgba(231,76,60,0.2); border-color:#e74c3c; color:#e74c3c; }
-    .nav button.pdf-btn:hover { background:#e74c3c; color:white; }
-    .nav button.print-btn { background:rgba(52,152,219,0.2); border-color:#3498db; color:#3498db; }
-    .nav button.print-btn:hover { background:#3498db; color:white; }
-    .nav span { color:rgba(255,255,255,0.4); font-size:12px; padding:0 4px; }
 
-    /* LOADING OVERLAY */
-    #loading-overlay {
-      display:none; position:fixed; inset:0;
-      background:rgba(0,0,0,0.85); z-index:9999;
-      flex-direction:column; align-items:center; justify-content:center; gap:20px;
+    .nav button:hover {
+      background: #f0a500;
+      color: #000;
+      border-color: #f0a500;
     }
-    #loading-overlay.show { display:flex; }
-    .spinner {
-      width:48px; height:48px; border:4px solid rgba(255,255,255,0.1);
-      border-top-color:#f0a500; border-radius:50%;
-      animation:spin .8s linear infinite;
-    }
-    @keyframes spin { to { transform:rotate(360deg); } }
-    #loading-overlay p { font-size:16px; color:rgba(255,255,255,0.7); }
-    #loading-overlay .progress-text { font-size:13px; color:#f0a500; }
 
-    /* PRINT */
+    .nav button.pdf-btn {
+      background: rgba(231, 76, 60, 0.2);
+      border-color: #e74c3c;
+      color: #e74c3c;
+    }
+
+    .nav button.pdf-btn:hover {
+      background: #e74c3c;
+      color: white;
+    }
+
+    .nav button.print-btn {
+      background: rgba(52, 152, 219, 0.2);
+      border-color: #3498db;
+      color: #3498db;
+    }
+
+    .nav button.print-btn:hover {
+      background: #3498db;
+      color: white;
+    }
+
+    .nav button.refresh-btn {
+      background: rgba(46, 204, 113, 0.2);
+      border-color: #2ecc71;
+      color: #2ecc71;
+    }
+
+    .nav button.refresh-btn:hover {
+      background: #2ecc71;
+      color: #000;
+    }
+
+    .nav span.sep {
+      color: rgba(255, 255, 255, 0.2);
+      padding: 0 2px;
+    }
+
     @media print {
-      body { background:#1a1a2e !important; }
-      .slide {
-        margin:0 !important; display:flex !important;
-        page-break-after:always;
-        -webkit-print-color-adjust:exact;
-        print-color-adjust:exact;
+      body {
+        background: #1a1a2e !important;
       }
-      .nav { display:none !important; }
-      #loading-overlay { display:none !important; }
+
+      .slide {
+        margin: 0 !important;
+        display: flex !important;
+        page-break-after: always;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .nav,
+      #pdf-overlay,
+      #init-screen,
+      #error-banner {
+        display: none !important;
+      }
     }
   </style>
 </head>
+
 <body>
 
-<!-- LOADING OVERLAY -->
-<div id="loading-overlay">
-  <div class="spinner"></div>
-  <p>Menyiapkan PDF...</p>
-  <div class="progress-text" id="loading-progress">Memproses slide 0 / 6</div>
-</div>
-
-<!-- ═══════════════════════════════════════════ -->
-<!-- SLIDE 1: COVER                              -->
-<!-- ═══════════════════════════════════════════ -->
-<div class="slide slide-cover" id="slide-1">
-  <div class="badge">RAHASIA INTERNAL · BOD BRIEFING</div>
-  <div class="cover-title">Postur Anggaran &amp; Realisasi<br><span>Romadan</span> TA 2026</div>
-  <div class="cover-sub">Executive Summary — s.d. Maret 2026</div>
-  <div class="cover-boxes">
-    <div class="cover-box gold">
-      <div class="lbl">TOTAL PAGU (EXCL. ASURANSI)</div>
-      <div class="amt">Rp 730,07 Jt</div>
-    </div>
-    <div class="cover-box teal">
-      <div class="lbl">REALISASI S.D. MARET 2026</div>
-      <div class="amt">Rp 135,83 Jt</div>
-    </div>
-    <div class="cover-box blue2">
-      <div class="lbl">PERSENTASE SERAPAN</div>
-      <div class="amt">18,6%</div>
-    </div>
+  <!-- INIT -->
+  <div id="init-screen">
+    <div class="spinner"></div>
+    <p>Memuat data dari Google Sheets...</p>
+    <div class="sub" id="init-status">Menghubungkan ke server...</div>
   </div>
-  <div class="footer-slide">CONFIDENTIAL</div>
-</div>
-
-<!-- ═══════════════════════════════════════════ -->
-<!-- SLIDE 2: OVERVIEW                           -->
-<!-- ═══════════════════════════════════════════ -->
-<div class="slide slide-dark" id="slide-2">
-  <div class="stitle">Executive Overview</div>
-  <div class="sheading">Ringkasan Pagu Anggaran</div>
-  <div class="divider"></div>
-  <div class="cards">
-    <div class="card gold">
-      <div class="card-icon">📊</div>
-      <div class="card-lbl">TOTAL PAGU (INCL. ASURANSI)</div>
-      <div class="card-val gold">Rp 28,06 M</div>
-      <div class="card-note">8 akun belanja</div>
-    </div>
-    <div class="card blue">
-      <div class="card-icon">🏗️</div>
-      <div class="card-lbl">BELANJA ASURANSI GEDUNG</div>
-      <div class="card-val blue">Rp 27,13 M</div>
-      <div class="card-note">96,7% dari total pagu</div>
-    </div>
-    <div class="card green">
-      <div class="card-icon">⚙️</div>
-      <div class="card-lbl">BELANJA OPERASIONAL MURNI</div>
-      <div class="card-val green">Rp 730,07 Jt</div>
-      <div class="card-note">Exclude asuransi</div>
-    </div>
-    <div class="card red">
-      <div class="card-icon">📈</div>
-      <div class="card-lbl">REALISASI S.D. MARET</div>
-      <div class="card-val red">Rp 135,83 Jt</div>
-      <div class="card-note">Serapan 18,6%</div>
-    </div>
+  <div id="error-banner"></div>
+  <div id="pdf-overlay">
+    <div class="spinner"></div>
+    <p>Menyiapkan PDF...</p>
+    <div class="prog-text" id="pdf-progress">Memproses slide 0 / 7</div>
   </div>
-  <div class="footer-slide">CONFIDENTIAL</div>
-</div>
 
-<!-- ═══════════════════════════════════════════ -->
-<!-- SLIDE 3: REALISASI PER BULAN                -->
-<!-- ═══════════════════════════════════════════ -->
-<div class="slide slide-dark" id="slide-3">
-  <div class="stitle">Realisasi Anggaran</div>
-  <div class="sheading">Perkembangan Serapan Per Bulan</div>
-  <div class="divider"></div>
-  <div style="display:flex; gap:40px; align-items:flex-start;">
-    <div style="flex:1">
-      <div class="month-bars">
-        <div class="month-col">
-          <div class="bar-wrap">
-            <div class="bar" style="height:2px; background:rgba(255,255,255,0.15); color:rgba(255,255,255,0.3);">0%</div>
-          </div>
-          <div class="month-lbl">Januari</div>
-          <div class="month-amt">Rp 0</div>
-        </div>
-        <div class="month-col">
-          <div class="bar-wrap">
-            <div class="bar" style="height:55px; background:linear-gradient(180deg,#3498db,#2980b9);">6,2%</div>
-          </div>
-          <div class="month-lbl">Februari</div>
-          <div class="month-amt">Rp 45,27 Jt</div>
-        </div>
-        <div class="month-col">
-          <div class="bar-wrap">
-            <div class="bar" style="height:110px; background:linear-gradient(180deg,#f0a500,#e67e22);">12,4%</div>
-          </div>
-          <div class="month-lbl">Maret</div>
-          <div class="month-amt">Rp 90,56 Jt</div>
-        </div>
-        <div class="month-col">
-          <div class="bar-wrap">
-            <div class="bar" style="height:2px; background:rgba(255,255,255,0.08);"></div>
-          </div>
-          <div class="month-lbl" style="color:rgba(255,255,255,0.3);">Apr–Des</div>
-          <div class="month-amt" style="color:rgba(255,255,255,0.3);">—</div>
-        </div>
+  <!-- ══════════════════════════════════════════════════════
+     SLIDE 1 · COVER
+══════════════════════════════════════════════════════ -->
+  <div class="slide slide-cover" id="slide-1">
+    <div class="badge">RAHASIA INTERNAL · BOD BRIEFING</div>
+    <div class="cover-title">Postur Anggaran &amp; Realisasi<br><span>Romadan</span> TA 2026</div>
+    <div class="cover-sub">Executive Summary — Real-time dari Google Sheets</div>
+    <div class="cover-boxes">
+      <div class="cover-box gold">
+        <div class="lbl">TOTAL PAGU (EXCL. ASURANSI)</div>
+        <!-- C12 Summary2026 -->
+        <div class="amt" id="s1-pagu-excl">—</div>
+      </div>
+      <div class="cover-box teal">
+        <div class="lbl">REALISASI S.D. BULAN INI</div>
+        <!-- Z2 AnggaranRealisasi2026 -->
+        <div class="amt" id="s1-realisasi">—</div>
+      </div>
+      <div class="cover-box purple">
+        <div class="lbl">REALISASI OUTSTANDING</div>
+        <!-- Y2 AnggaranRealisasi2026 -->
+        <div class="amt" id="s1-outstanding">—</div>
+      </div>
+      <div class="cover-box blue2">
+        <div class="lbl">PERSENTASE SERAPAN</div>
+        <!-- T12 Summary2026 -->
+        <div class="amt" id="s1-persen">—</div>
       </div>
     </div>
-    <div style="width:340px; display:flex; flex-direction:column; gap:14px;">
-      <div class="card blue" style="padding:18px;">
-        <div class="card-lbl">REALISASI FEBRUARI</div>
-        <div class="card-val blue" style="font-size:20px;">Rp 45.271.335</div>
-        <div class="card-note">6,2% dari pagu operasional</div>
-      </div>
-      <div class="card gold" style="padding:18px;">
-        <div class="card-lbl">REALISASI MARET</div>
-        <div class="card-val gold" style="font-size:20px;">Rp 90.560.094</div>
-        <div class="card-note">12,4% dari pagu operasional</div>
-      </div>
-      <div class="card green" style="padding:18px;">
-        <div class="card-lbl">KUMULATIF S.D. MARET</div>
-        <div class="card-val green" style="font-size:20px;">Rp 135.831.429</div>
-        <div class="card-note">18,6% dari pagu operasional</div>
-      </div>
-    </div>
+    <div class="ts-label" id="last-updated"></div>
+    <div class="footer-slide">CONFIDENTIAL</div>
   </div>
-  <div class="footer-slide">CONFIDENTIAL</div>
-</div>
 
-<!-- ═══════════════════════════════════════════ -->
-<!-- SLIDE 4: TABEL REALISASI PER AKUN           -->
-<!-- ═══════════════════════════════════════════ -->
-<div class="slide slide-dark" id="slide-4">
-  <div class="stitle">Realisasi Per Akun</div>
-  <div class="sheading">Serapan Anggaran Operasional s.d. Maret 2026</div>
-  <div class="divider"></div>
-  <table>
-    <thead>
-      <tr>
-        <th>AKUN</th>
-        <th>URAIAN</th>
-        <th class="right">PAGU (Rp)</th>
-        <th class="right">REALISASI (Rp)</th>
-        <th class="right">SISA (Rp)</th>
-        <th class="right">%</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><span class="akun-badge">524111</span></td>
-        <td>Belanja Perjadin Biasa</td>
-        <td class="right">480.887.000</td>
-        <td class="right">50.177.429</td>
-        <td class="right">430.709.571</td>
-        <td class="right"><span class="pct-pill low">10,4%</span></td>
-      </tr>
-      <tr>
-        <td><span class="akun-badge">521115</span></td>
-        <td>Belanja Honor Operasional Satker</td>
-        <td class="right">201.000.000</td>
-        <td class="right">30.000.000</td>
-        <td class="right">171.000.000</td>
-        <td class="right"><span class="pct-pill low">14,9%</span></td>
-      </tr>
-      <tr>
-        <td><span class="akun-badge">521211</span></td>
-        <td>Belanja Bahan</td>
-        <td class="right">118.231.000</td>
-        <td class="right">44.258.000</td>
-        <td class="right">73.973.000</td>
-        <td class="right"><span class="pct-pill mid">37,4%</span></td>
-      </tr>
-      <tr>
-        <td><span class="akun-badge">524113</span></td>
-        <td>Belanja Perjadin Dalkot</td>
-        <td class="right">73.984.000</td>
-        <td class="right">11.396.000</td>
-        <td class="right">62.588.000</td>
-        <td class="right"><span class="pct-pill low">15,4%</span></td>
-      </tr>
-      <tr>
-        <td><span class="akun-badge">522191</span></td>
-        <td>Belanja Jasa Lainnya</td>
-        <td class="right">42.500.000</td>
-        <td class="right">0</td>
-        <td class="right">42.500.000</td>
-        <td class="right"><span class="pct-pill low">0%</span></td>
-      </tr>
-      <tr>
-        <td><span class="akun-badge">521213</span></td>
-        <td>Belanja Honor Output Kegiatan</td>
-        <td class="right">11.000.000</td>
-        <td class="right">0</td>
-        <td class="right">11.000.000</td>
-        <td class="right"><span class="pct-pill low">0%</span></td>
-      </tr>
-      <tr>
-        <td><span class="akun-badge">522151</span></td>
-        <td>Belanja Jasa Profesi</td>
-        <td class="right">3.468.000</td>
-        <td class="right">0</td>
-        <td class="right">3.468.000</td>
-        <td class="right"><span class="pct-pill low">0%</span></td>
-      </tr>
-    </tbody>
-    <tfoot>
-      <tr>
-        <td colspan="2">TOTAL OPERASIONAL (EXCL. ASURANSI)</td>
-        <td class="right">730.070.000</td>
-        <td class="right">135.831.429</td>
-        <td class="right">594.238.571</td>
-        <td class="right">18,6%</td>
-      </tr>
-    </tfoot>
-  </table>
-  <div class="footer-slide">CONFIDENTIAL</div>
-</div>
-
-<!-- ═══════════════════════════════════════════ -->
-<!-- SLIDE 5: PROGRESS BAR                       -->
-<!-- ═══════════════════════════════════════════ -->
-<div class="slide slide-dark" id="slide-5">
-  <div class="stitle">Visualisasi Serapan</div>
-  <div class="sheading">Progress Realisasi Per Akun Belanja</div>
-  <div class="divider"></div>
-  <div class="progress-section">
-    <div class="prog-row">
-      <div class="prog-header">
-        <span class="prog-name">524111 · Perjadin Biasa</span>
-        <span class="prog-vals">Rp 50,18 Jt / Rp 480,89 Jt &nbsp;|&nbsp; <strong>10,4%</strong></span>
+  <!-- ══════════════════════════════════════════════════════
+     SLIDE 2 · OVERVIEW
+══════════════════════════════════════════════════════ -->
+  <div class="slide slide-dark" id="slide-2">
+    <div class="stitle">Executive Overview</div>
+    <div class="sheading">Ringkasan Pagu Anggaran</div>
+    <div class="divider"></div>
+    <div class="cards">
+      <div class="card gold">
+        <div class="card-icon">📊</div>
+        <div class="card-lbl">TOTAL PAGU (INCL. ASURANSI)</div>
+        <!-- C11 Summary2026 -->
+        <div class="card-val gold" id="s2-incl">—</div>
+        <div class="card-note">Include Asuransi Gedung</div>
       </div>
-      <div class="prog-bar"><div class="prog-fill" style="width:10.4%;background:linear-gradient(90deg,#e74c3c,#c0392b);"></div></div>
-    </div>
-    <div class="prog-row">
-      <div class="prog-header">
-        <span class="prog-name">521115 · Honor Operasional Satker</span>
-        <span class="prog-vals">Rp 30,00 Jt / Rp 201,00 Jt &nbsp;|&nbsp; <strong>14,9%</strong></span>
+      <div class="card blue">
+        <div class="card-icon">🏗️</div>
+        <div class="card-lbl">BELANJA ASURANSI GEDUNG</div>
+        <!-- C7 Summary2026 -->
+        <div class="card-val blue" id="s2-asuransi">—</div>
+        <div class="card-note" id="s2-asuransi-pct">—</div>
       </div>
-      <div class="prog-bar"><div class="prog-fill" style="width:14.9%;background:linear-gradient(90deg,#e74c3c,#c0392b);"></div></div>
-    </div>
-    <div class="prog-row">
-      <div class="prog-header">
-        <span class="prog-name">521211 · Belanja Bahan</span>
-        <span class="prog-vals">Rp 44,26 Jt / Rp 118,23 Jt &nbsp;|&nbsp; <strong>37,4%</strong></span>
+      <div class="card green">
+        <div class="card-icon">⚙️</div>
+        <div class="card-lbl">BELANJA OPERASIONAL MURNI</div>
+        <!-- C12 Summary2026 -->
+        <div class="card-val green" id="s2-excl">—</div>
+        <div class="card-note">Exclude Asuransi</div>
       </div>
-      <div class="prog-bar"><div class="prog-fill" style="width:37.4%;background:linear-gradient(90deg,#f39c12,#d35400);"></div></div>
-    </div>
-    <div class="prog-row">
-      <div class="prog-header">
-        <span class="prog-name">524113 · Perjadin Dalkot</span>
-        <span class="prog-vals">Rp 11,40 Jt / Rp 73,98 Jt &nbsp;|&nbsp; <strong>15,4%</strong></span>
+      <div class="card red">
+        <div class="card-icon">📈</div>
+        <div class="card-lbl">REALISASI KUMULATIF</div>
+        <!-- P12 Summary2026 -->
+        <div class="card-val red" id="s2-real">—</div>
+        <div class="card-note" id="s2-real-pct">—</div>
       </div>
-      <div class="prog-bar"><div class="prog-fill" style="width:15.4%;background:linear-gradient(90deg,#e74c3c,#c0392b);"></div></div>
     </div>
-    <div class="prog-row">
-      <div class="prog-header">
-        <span class="prog-name">522191 · Jasa Lainnya</span>
-        <span class="prog-vals">Rp 0 / Rp 42,50 Jt &nbsp;|&nbsp; <strong>0%</strong></span>
-      </div>
-      <div class="prog-bar"><div class="prog-fill" style="width:0.5%;background:rgba(255,255,255,0.15);"></div></div>
-    </div>
-    <div class="prog-row">
-      <div class="prog-header">
-        <span class="prog-name">521213 · Honor Output Kegiatan</span>
-        <span class="prog-vals">Rp 0 / Rp 11,00 Jt &nbsp;|&nbsp; <strong>0%</strong></span>
-      </div>
-      <div class="prog-bar"><div class="prog-fill" style="width:0.5%;background:rgba(255,255,255,0.15);"></div></div>
-    </div>
-    <div class="prog-row">
-      <div class="prog-header">
-        <span class="prog-name">522151 · Jasa Profesi</span>
-        <span class="prog-vals">Rp 0 / Rp 3,47 Jt &nbsp;|&nbsp; <strong>0%</strong></span>
-      </div>
-      <div class="prog-bar"><div class="prog-fill" style="width:0.5%;background:rgba(255,255,255,0.15);"></div></div>
-    </div>
-    <div class="prog-row" style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);">
-      <div class="prog-header">
-        <span class="prog-name" style="font-weight:700;color:#f0a500;">TOTAL OPERASIONAL</span>
-        <span class="prog-vals" style="color:#f0a500;">Rp 135,83 Jt / Rp 730,07 Jt &nbsp;|&nbsp; <strong>18,6%</strong></span>
-      </div>
-      <div class="prog-bar" style="height:12px;"><div class="prog-fill" style="width:18.6%;background:linear-gradient(90deg,#f0a500,#e67e22);"></div></div>
-    </div>
+    <div class="footer-slide">CONFIDENTIAL</div>
   </div>
-  <div class="footer-slide">CONFIDENTIAL</div>
-</div>
 
-<!-- ═══════════════════════════════════════════ -->
-<!-- SLIDE 6: KESIMPULAN                         -->
-<!-- ═══════════════════════════════════════════ -->
-<div class="slide slide-dark" id="slide-6">
-  <div class="stitle">Kesimpulan</div>
-  <div class="sheading">Poin Utama untuk Pimpinan</div>
-  <div class="divider"></div>
-  <div class="points">
-    <div class="point">
-      <div class="point-icon">📉</div>
-      <div class="point-text">
-        <strong>Serapan Masih Rendah — 18,6%</strong>
-        <p>Dari pagu operasional Rp730,07 jt, baru terealisasi Rp135,83 jt s.d. Maret 2026. Januari nihil realisasi, akselerasi mulai terlihat di Maret (Rp90,56 jt).</p>
+  <!-- ══════════════════════════════════════════════════════
+     SLIDE 3 · REALISASI PER BULAN
+══════════════════════════════════════════════════════ -->
+  <div class="slide slide-dark" id="slide-3">
+    <div class="stitle">Realisasi Anggaran</div>
+    <div class="sheading">Perkembangan Serapan Per Bulan</div>
+    <div class="divider"></div>
+    <div style="display:flex;gap:32px;align-items:flex-start;">
+      <div style="flex:1">
+        <div class="month-bars" id="month-bars"></div>
       </div>
+      <div style="width:300px;display:flex;flex-direction:column;gap:10px;" id="month-cards"></div>
     </div>
-    <div class="point">
-      <div class="point-icon">🍽️</div>
-      <div class="point-text">
-        <strong>Belanja Bahan Paling Progresif</strong>
-        <p>Akun 521211 (Konsumsi Rapat) telah terserap 37,4% — tertinggi dibanding akun lain, didominasi kegiatan koordinasi dan konsultasi lintas unit.</p>
-      </div>
-    </div>
-    <div class="point">
-      <div class="point-icon">✈️</div>
-      <div class="point-text">
-        <strong>Perjadin Biasa Perlu Didorong</strong>
-        <p>Akun 524111 baru terserap 10,4% dari pagu Rp480,89 jt — porsi terbesar anggaran, namun realisasi masih minim dan perlu akselerasi segera.</p>
-      </div>
-    </div>
-    <div class="point">
-      <div class="point-icon">⚠️</div>
-      <div class="point-text">
-        <strong>3 Akun Belum Ada Realisasi</strong>
-        <p>Jasa Lainnya (522191), Honor Output (521213), dan Jasa Profesi (522151) belum ada realisasi — perlu monitoring dan percepatan pelaksanaan kegiatan.</p>
-      </div>
-    </div>
+    <div class="footer-slide">CONFIDENTIAL</div>
   </div>
-  <div class="footer-slide">CONFIDENTIAL</div>
-</div>
 
-<!-- ═══════════════════════════════════════════ -->
-<!-- NAVIGATION BAR                              -->
-<!-- ═══════════════════════════════════════════ -->
-<div class="nav">
-  <button onclick="prevSlide()">← Prev</button>
-  <span id="nav-info">1 / 6</span>
-  <button onclick="nextSlide()">Next →</button>
-  <span style="color:rgba(255,255,255,0.2);">|</span>
-  <button class="print-btn" onclick="printPDF()">🖨️ Print</button>
-  <button class="pdf-btn" onclick="downloadPDF()">⬇️ Download PDF</button>
-</div>
+  <!-- ══════════════════════════════════════════════════════
+     SLIDE 4 · TABEL PER AKUN
+══════════════════════════════════════════════════════ -->
+  <div class="slide slide-dark" id="slide-4">
+    <div class="stitle">Realisasi Per Akun</div>
+    <div class="sheading">Serapan Anggaran Operasional</div>
+    <div class="divider"></div>
+    <table>
+      <thead>
+        <tr>
+          <th>AKUN</th>
+          <th>URAIAN</th>
+          <th class="right">PAGU (Rp)</th>
+          <th class="right">REALISASI (Rp)</th>
+          <th class="right">OUTSTANDING (Rp)</th>
+          <th class="right">SISA (Rp)</th>
+          <th class="right">%</th>
+        </tr>
+      </thead>
+      <tbody id="akun-tbody"></tbody>
+      <tfoot id="akun-tfoot"></tfoot>
+    </table>
+    <div class="footer-slide">CONFIDENTIAL</div>
+  </div>
 
-<script>
-  const { jsPDF } = window.jspdf;
-  const slides = document.querySelectorAll('.slide');
-  const totalSlides = slides.length;
-  let current = 0;
+  <!-- ══════════════════════════════════════════════════════
+     SLIDE 5 · PROGRESS BAR
+══════════════════════════════════════════════════════ -->
+  <div class="slide slide-dark" id="slide-5">
+    <div class="stitle">Visualisasi Serapan</div>
+    <div class="sheading">Progress Realisasi Per Akun Belanja</div>
+    <div class="divider"></div>
+    <div id="progress-bars"></div>
+    <div class="footer-slide">CONFIDENTIAL</div>
+  </div>
+  <!-- ══════════════════════════════════════════════════════
+     SLIDE 6 · RPD TRIWULAN I
+══════════════════════════════════════════════════════ -->
+  <div class="slide slide-dark" id="slide-6">
+    <div class="stitle">Rencana Penarikan Dana</div>
+    <div class="sheading">Rencana Penarikan Dana Triwulan I</div>
+    <div class="divider"></div>
+    <table>
+      <thead>
+        <tr>
+          <th>NO</th>
+          <th>BAGIAN</th>
+          <th class="right">SEMULA RPD-TW I (Rp)</th>
+          <th class="right">REVISI RPD-TW I (Rp)</th>
+          <th class="right">REALISASI TW I (Rp)</th>
+          <th class="right">% SERAPAN</th>
+        </tr>
+      </thead>
+      <tbody id="bagian-tbody"></tbody>
+      <tfoot id="bagian-tfoot"></tfoot>
+    </table>
+    <div class="footer-slide">CONFIDENTIAL</div>
+  </div>
+  <!-- ══════════════════════════════════════════════════════
+     SLIDE 7 · KESIMPULAN
+══════════════════════════════════════════════════════ -->
+  <div class="slide slide-dark" id="slide-7">
+    <div class="stitle">Kesimpulan</div>
+    <div class="sheading">Poin Utama untuk Pimpinan</div>
+    <div class="divider"></div>
+    <div class="points" id="kesimpulan-points"></div>
+    <div class="footer-slide">CONFIDENTIAL</div>
+  </div>
 
-  /* ── Tampilkan satu slide ── */
-  function showSlide(n) {
-    slides.forEach((s, i) => s.style.display = i === n ? 'flex' : 'none');
-    document.getElementById('nav-info').textContent = `${n + 1} / ${totalSlides}`;
-  }
-  function nextSlide() { if (current < totalSlides - 1) { current++; showSlide(current); } }
-  function prevSlide() { if (current > 0) { current--; showSlide(current); } }
-  document.addEventListener('keydown', e => {
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextSlide();
-    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   prevSlide();
-  });
+  <!-- NAV -->
+  <div class="nav">
+    <button onclick="prevSlide()">← Prev</button>
+    <span id="nav-info" style="color:rgba(255,255,255,0.4);font-size:12px;padding:0 4px;">1 / 7</span>
+    <button onclick="nextSlide()">Next →</button>
+    <span class="sep">|</span>
+    <button class="refresh-btn" onclick="loadData()">🔄 Refresh</button>
+    <button class="print-btn" onclick="printAll()">🖨️ Print</button>
+    <button class="pdf-btn" onclick="downloadPDF()">⬇️ PDF</button>
+  </div>
 
-  /* ── Print ── */
-  function printPDF() {
-    // Tampilkan semua slide saat print
-    slides.forEach(s => s.style.display = 'flex');
-    window.print();
-    // Kembalikan ke slide aktif
-    showSlide(current);
-  }
+  <script>
+    // ══════════════════════════════════════════════
+    // KONFIGURASI
+    // ══════════════════════════════════════════════
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyvcsWjCGNLXZV03hCoKCO-E1f3fdFEQJnchbsFILKXcMeTFGYihWRuMZbErcxLcC4VJw/exec';
 
-  /* ── Download PDF via html2canvas + jsPDF ── */
-  async function downloadPDF() {
-    const overlay = document.getElementById('loading-overlay');
-    const progressText = document.getElementById('loading-progress');
-    overlay.classList.add('show');
+    const MONTHS = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const MONTH_COLORS = ['#3498db', '#f0a500', '#2ecc71', '#9b59b6', '#e74c3c',
+      '#1abc9c', '#e67e22', '#3498db', '#f0a500', '#2ecc71', '#9b59b6', '#e74c3c'];
 
-    const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [1280, 720] });
-    const savedCurrent = current;
+    // ══════════════════════════════════════════════
+    // MAPPING SEL SUMMARY2026
+    // Baris di array = index (0-based), kolom = 0-based
+    // Baris 1  (index 0)  = "POSTUR ANGGARAN ROMADAN TA 2026"
+    // Baris 2  (index 1)  = Header kolom
+    // Baris 3  (index 2)  = Akun 521211 dst.
+    // Baris 11 (index 10) = INCLUDE ASURANSI
+    // Baris 12 (index 11) = EXCLUDE ASURANSI
+    //
+    // Kolom: A=0,B=1,C=2,D=3(Jan),E=4(Feb),...,O=14(Des),
+    //        P=15(Realisasi),Q=16(Sisa),R=17(Outstanding),
+    //        S=18(RULES),T=19(% Serapan),U=20(% Serapan Full)
+    // ══════════════════════════════════════════════
+    const ROW_INCL_ASURANSI = 10; // baris 11 → index 10
+    const ROW_EXCL_ASURANSI = 11; // baris 12 → index 11
+    const ROW_ASURANSI_GEDUNG = 6; // baris 7  → index 6  (akun 523113)
 
-    for (let i = 0; i < totalSlides; i++) {
-      progressText.textContent = `Memproses slide ${i + 1} / ${totalSlides}`;
+    const COL_PAGU = 2;  // C
+    const COL_JAN = 3;  // D
+    const COL_REALISASI = 15; // P
+    const COL_SISA = 16; // Q
+    const COL_OUTSTANDING = 17; // R
+    const COL_PCT_SERAPAN = 19; // T
 
-      // Tampilkan slide yg akan di-capture
-      slides.forEach((s, idx) => s.style.display = idx === i ? 'flex' : 'none');
+    // AnggaranRealisasi2026: baris 2 = index 1
+    const AR_ROW_TOTAL = 1;
+    const AR_COL_OUTSTANDING = 24; // Y (0-based)
+    const AR_COL_REALISASI = 25; // Z (0-based)
 
-      // Tunggu render
-      await new Promise(r => setTimeout(r, 300));
+    // ══════════════════════════════════════════════
+    // HELPERS
+    // ══════════════════════════════════════════════
+    let current = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
 
-      const canvas = await html2canvas(slides[i], {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: null,
-        logging: false,
-        width: 1280,
-        height: 720
-      });
+    function toNum(v) { return Number(String(v).replace(/[^0-9.-]/g, '')) || 0; }
 
-      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+    function fmt(n) {
+      const v = Math.round(toNum(n));
+      if (Math.abs(v) >= 1e9) return 'Rp ' + (v / 1e9).toFixed(2).replace('.', ',') + ' M';
+      if (Math.abs(v) >= 1e6) return 'Rp ' + (v / 1e6).toFixed(2).replace('.', ',') + ' Jt';
+      return 'Rp ' + v.toLocaleString('id-ID');
+    }
+    function fmtFull(n) { return Math.round(toNum(n)).toLocaleString('id-ID'); }
+    function fmtPct(v) {
+      const n = toNum(v);
+      // jika sudah dalam bentuk desimal 0.xx → kalikan 100
+      return (Math.abs(n) <= 1 ? (n * 100).toFixed(2) : n.toFixed(2)) + '%';
+    }
+    function pctNum(real, pagu) { return pagu === 0 ? 0 : (toNum(real) / toNum(pagu)) * 100; }
+    function pctClass(p) { return p >= 80 ? 'high' : p >= 40 ? 'mid' : 'low'; }
 
-      if (i > 0) pdf.addPage([1280, 720], 'landscape');
-      pdf.addImage(imgData, 'JPEG', 0, 0, 1280, 720);
+    // ══════════════════════════════════════════════
+    // FETCH
+    // ══════════════════════════════════════════════
+    async function fetchSheet(name) {
+      const r = await fetch(`${APPS_SCRIPT_URL}?sheet=${encodeURIComponent(name)}`);
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
     }
 
-    progressText.textContent = 'Menyimpan file...';
-    pdf.save('Anggaran_Romadan_TA2026.pdf');
+    // ══════════════════════════════════════════════
+    // RENDER
+    // ══════════════════════════════════════════════
+    function renderAll(sumRows, arRows) {
 
-    overlay.classList.remove('show');
-    showSlide(savedCurrent);
-  }
+      // ── Ambil nilai spesifik dari Summary2026 ──────────────────
+      const paguExcl = toNum(sumRows[ROW_EXCL_ASURANSI]?.[COL_PAGU]);         // C12
+      const paguIncl = toNum(sumRows[ROW_INCL_ASURANSI]?.[COL_PAGU]);         // C11
+      const paguAsuransi = toNum(sumRows[ROW_ASURANSI_GEDUNG]?.[COL_PAGU]);       // C7
+      const realKumulatif = toNum(sumRows[ROW_EXCL_ASURANSI]?.[COL_REALISASI]);    // P12
+      const pctSerapan = sumRows[ROW_EXCL_ASURANSI]?.[COL_PCT_SERAPAN];         // T12 (raw)
 
-  // Init
-  showSlide(0);
-</script>
+      // ── Ambil nilai dari AnggaranRealisasi2026 ──────────────────
+      const arOutstanding = toNum(arRows[AR_ROW_TOTAL]?.[AR_COL_OUTSTANDING]);     // Y2
+      const arRealisasi = toNum(arRows[AR_ROW_TOTAL]?.[AR_COL_REALISASI]);       // Z2
+
+      // ── Data per akun (baris 3–10, index 2–9) ──────────────────
+      const akunData = [];
+      for (let i = 2; i <= 9; i++) {
+        const r = sumRows[i];
+        if (!r || (!r[0] && !r[1])) continue;
+        akunData.push({
+          akun: r[0],
+          uraian: r[1],
+          pagu: toNum(r[COL_PAGU]),
+          bulan: MONTHS.map((_, mi) => toNum(r[COL_JAN + mi])),
+          real: toNum(r[COL_REALISASI]),
+          sisa: toNum(r[COL_SISA]),
+          out: toNum(r[COL_OUTSTANDING]),
+          pct: r[COL_PCT_SERAPAN]
+        });
+      }
+
+      // Timestamp
+      const now = new Date();
+      document.getElementById('last-updated').textContent =
+        'Data diperbarui: ' + now.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) +
+        ' ' + now.toLocaleTimeString('id-ID');
+
+      // ══ SLIDE 1 ══
+      document.getElementById('s1-pagu-excl').textContent = fmt(paguExcl);
+      document.getElementById('s1-realisasi').textContent = fmt(arRealisasi);
+      document.getElementById('s1-outstanding').textContent = fmt(arOutstanding);
+      document.getElementById('s1-persen').textContent = fmtPct(pctSerapan);
+
+      // ══ SLIDE 2 ══
+      document.getElementById('s2-incl').textContent = fmt(paguIncl);
+      document.getElementById('s2-asuransi').textContent = fmt(paguAsuransi);
+      document.getElementById('s2-asuransi-pct').textContent =
+        pctNum(paguAsuransi, paguIncl).toFixed(1) + '% dari total pagu';
+      document.getElementById('s2-excl').textContent = fmt(paguExcl);
+      document.getElementById('s2-real').textContent = fmt(realKumulatif);
+      document.getElementById('s2-real-pct').textContent =
+        'Serapan ' + pctNum(realKumulatif, paguExcl).toFixed(2) + '%';
+
+      // ══ SLIDE 3: BAR CHART ══
+      const totalBulan = MONTHS.map((_, mi) =>
+        akunData.filter(d => String(d.akun) !== '523113').reduce((s, d) => s + d.bulan[mi], 0)
+      );
+      const maxVal = Math.max(...totalBulan, 1);
+      const barsHtml = totalBulan.map((v, i) => {
+        const h = Math.max(2, Math.round((v / maxVal) * 140));
+        const pStr = pctNum(v, paguExcl).toFixed(1) + '%';
+        const col = v > 0 ? MONTH_COLORS[i] : 'rgba(255,255,255,0.08)';
+        return `<div class="month-col">
+      <div class="bar-wrap">
+        <div class="bar" style="height:${h}px;background:linear-gradient(180deg,${col},${col}bb);">
+          ${v > 0 ? pStr : ''}
+        </div>
+      </div>
+      <div class="month-lbl">${MONTHS[i].substring(0, 3)}</div>
+      <div class="month-amt">${v > 0 ? fmt(v) : '—'}</div>
+    </div>`;
+      }).join('');
+      document.getElementById('month-bars').innerHTML = barsHtml;
+
+      // Cards 3 bulan aktif terakhir
+      const active = totalBulan.map((v, i) => ({ v, i })).filter(x => x.v > 0).slice(-3);
+      const cColors = ['blue', 'gold', 'green'];
+      document.getElementById('month-cards').innerHTML = active.length
+        ? active.map((m, ci) => `
+        <div class="card ${cColors[ci]}" style="padding:14px;">
+          <div class="card-lbl">REALISASI ${MONTHS[m.i].toUpperCase()}</div>
+          <div class="card-val ${cColors[ci]}" style="font-size:17px;">${fmtFull(m.v)}</div>
+          <div class="card-note">${pctNum(m.v, paguExcl).toFixed(2)}% dari pagu operasional</div>
+        </div>`).join('')
+        : '<div style="color:rgba(255,255,255,0.3);font-size:13px;">Belum ada realisasi</div>';
+
+      // ══ SLIDE 4: TABEL PER AKUN ══
+      const operasional = akunData.filter(d => String(d.akun) !== '523113');
+      document.getElementById('akun-tbody').innerHTML = operasional.map(d => {
+        const p = pctNum(d.real, d.pagu);
+        return `<tr>
+      <td><span class="akun-badge">${d.akun}</span></td>
+      <td>${d.uraian}</td>
+      <td class="right">${fmtFull(d.pagu)}</td>
+      <td class="right">${fmtFull(d.real)}</td>
+      <td class="right">${fmtFull(d.out)}</td>
+      <td class="right">${fmtFull(d.sisa)}</td>
+      <td class="right"><span class="pct-pill ${pctClass(p)}">${p.toFixed(1)}%</span></td>
+    </tr>`;
+      }).join('');
+
+      const totPagu = operasional.reduce((s, d) => s + d.pagu, 0);
+      const totReal = operasional.reduce((s, d) => s + d.real, 0);
+      const totOut = operasional.reduce((s, d) => s + d.out, 0);
+      const totSisa = operasional.reduce((s, d) => s + d.sisa, 0);
+      document.getElementById('akun-tfoot').innerHTML = `<tr>
+    <td colspan="2">TOTAL OPERASIONAL (EXCL. ASURANSI)</td>
+    <td class="right">${fmtFull(totPagu)}</td>
+    <td class="right">${fmtFull(totReal)}</td>
+    <td class="right">${fmtFull(totOut)}</td>
+    <td class="right">${fmtFull(totSisa)}</td>
+    <td class="right">${pctNum(totReal, totPagu).toFixed(1)}%</td>
+  </tr>`;
+
+      // ══ SLIDE 5: PROGRESS BARS ══
+      document.getElementById('progress-bars').innerHTML = operasional.map(d => {
+        const p = pctNum(d.real, d.pagu);
+        const w = Math.min(Math.max(p, 0.3), 100);
+        const fill = p >= 80 ? 'linear-gradient(90deg,#2ecc71,#27ae60)'
+          : p >= 40 ? 'linear-gradient(90deg,#f39c12,#d35400)'
+            : p > 0 ? 'linear-gradient(90deg,#e74c3c,#c0392b)'
+              : 'rgba(255,255,255,0.12)';
+        return `<div class="prog-row">
+      <div class="prog-header">
+        <span class="prog-name">${d.akun} · ${d.uraian}</span>
+        <span class="prog-vals">${fmt(d.real)} / ${fmt(d.pagu)} &nbsp;|&nbsp; <strong>${p.toFixed(1)}%</strong></span>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" style="width:${w}%;background:${fill};"></div></div>
+    </div>`;
+      }).join('') + `
+  <div class="prog-row" style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.1);">
+    <div class="prog-header">
+      <span class="prog-name" style="font-weight:700;color:#f0a500;">TOTAL OPERASIONAL</span>
+      <span class="prog-vals" style="color:#f0a500;">${fmt(totReal)} / ${fmt(totPagu)} &nbsp;|&nbsp;
+        <strong>${pctNum(totReal, totPagu).toFixed(1)}%</strong></span>
+    </div>
+    <div class="prog-bar" style="height:12px;">
+      <div class="prog-fill" style="width:${Math.max(pctNum(totReal, totPagu), 0.3)}%;
+        background:linear-gradient(90deg,#f0a500,#e67e22);"></div>
+    </div>
+  </div>`;
+
+      // ══ SLIDE 6: RPD TRIWULAN I ══
+      // Mapping baris (0-based): baris 15=index 14, 16=15, 17=16, 18=17, 19=18
+      // Kolom: C=2(SEMULA), G=6(REVISI RPD-TWI), H=7(REALISASI TWI), I=8(%SERAPAN)
+      const bagianDef = [
+        { no: '71', bagian: 'Pengembangan Strategi dan Kinerja', row: 14 },
+        { no: '72', bagian: 'Perencanaan BMN', row: 15 },
+        { no: '73', bagian: 'Pengelolaan BMN', row: 16 },
+        { no: '74', bagian: 'Penatausahaan BMN', row: 17 },
+        { no: '75', bagian: 'Manajemen Pengadaan', row: 18 },
+      ];
+
+      const bagianRows = bagianDef.map(b => {
+        const r = sumRows[b.row] || [];
+        const semula = toNum(r[2]);   // C
+        const revisi = toNum(r[6]);   // G
+        const real = toNum(r[7]);   // H
+        const pct = r[8];          // I (raw, bisa desimal atau persen)
+        return { ...b, semula, revisi, real, pct };
+      });
+
+      // Total
+      const totSemula = bagianRows.reduce((s, b) => s + b.semula, 0);
+      const totRevisi = bagianRows.reduce((s, b) => s + b.revisi, 0);
+      const totReal6 = bagianRows.reduce((s, b) => s + b.real, 0);
+      const totPct6 = totRevisi > 0 ? (totReal6 / totRevisi) * 100 : 0;
+
+      document.getElementById('bagian-tbody').innerHTML = bagianRows.map(b => {
+        const pctVal = Math.abs(toNum(b.pct)) <= 1
+          ? toNum(b.pct) * 100
+          : toNum(b.pct);
+        return `<tr>
+      <td>${b.no}</td>
+      <td>${b.bagian}</td>
+      <td class="right">${fmtFull(b.semula)}</td>
+      <td class="right">${fmtFull(b.revisi)}</td>
+      <td class="right">${fmtFull(b.real)}</td>
+      <td class="right">
+        <span class="pct-pill ${pctClass(pctVal)}">${pctVal.toFixed(2)}%</span>
+      </td>
+    </tr>`;
+      }).join('');
+
+      document.getElementById('bagian-tfoot').innerHTML = `<tr>
+    <td colspan="2">TOTAL</td>
+    <td class="right">${fmtFull(totSemula)}</td>
+    <td class="right">${fmtFull(totRevisi)}</td>
+    <td class="right">${fmtFull(totReal6)}</td>
+    <td class="right">${totPct6.toFixed(2)}%</td>
+  </tr>`;
+
+      // ══ SLIDE 7: KESIMPULAN (auto-generate dari data aktual) ══
+      const topAkun = [...operasional].sort((a, b) => pctNum(b.real, b.pagu) - pctNum(a.real, a.pagu))[0];
+      const zeroAkun = operasional.filter(d => d.real === 0);
+      const lowAkun = operasional.find(d => d.pagu > 100e6 && pctNum(d.real, d.pagu) < 20);
+      const pctTotal = pctNum(totReal, totPagu);
+      const lastActive = MONTHS.reduce((last, m, i) =>
+        totalBulan[i] > 0 ? i : last, -1);
+
+      let pts = `
+  <div class="point">
+    <div class="point-icon">📉</div>
+    <div class="point-text">
+      <strong>Serapan Kumulatif — ${pctTotal.toFixed(2)}%</strong>
+      <p>Dari pagu operasional ${fmt(paguExcl)}, telah terealisasi ${fmt(totReal)}
+      ${lastActive >= 0 ? ' s.d. ' + MONTHS[lastActive] + ' 2026' : ''}.
+      Realisasi outstanding tercatat ${fmt(arOutstanding)}.</p>
+    </div>
+  </div>`;
+
+      if (topAkun) {
+        pts += `
+  <div class="point">
+    <div class="point-icon">🏆</div>
+    <div class="point-text">
+      <strong>Akun Paling Progresif — ${topAkun.akun}</strong>
+      <p>${topAkun.uraian} telah terserap ${pctNum(topAkun.real, topAkun.pagu).toFixed(1)}%
+      (${fmt(topAkun.real)}) — tertinggi dibanding akun lain.</p>
+    </div>
+  </div>`;
+      }
+      if (lowAkun) {
+        pts += `
+  <div class="point">
+    <div class="point-icon">⚡</div>
+    <div class="point-text">
+      <strong>Perlu Akselerasi — ${lowAkun.akun}</strong>
+      <p>${lowAkun.uraian} baru terserap ${pctNum(lowAkun.real, lowAkun.pagu).toFixed(1)}%
+      dari pagu ${fmt(lowAkun.pagu)} — perlu percepatan segera.</p>
+    </div>
+  </div>`;
+      }
+      if (zeroAkun.length > 0) {
+        pts += `
+  <div class="point">
+    <div class="point-icon">⚠️</div>
+    <div class="point-text">
+      <strong>${zeroAkun.length} Akun Belum Ada Realisasi</strong>
+      <p>${zeroAkun.map(d => d.akun + ' (' + d.uraian + ')').join(', ')} —
+      perlu monitoring dan percepatan pelaksanaan kegiatan.</p>
+    </div>
+  </div>`;
+      }
+      document.getElementById('kesimpulan-points').innerHTML = pts;
+    }
+
+    // ══════════════════════════════════════════════
+    // LOAD DATA
+    // ══════════════════════════════════════════════
+    async function loadData() {
+      const screen = document.getElementById('init-screen');
+      const status = document.getElementById('init-status');
+      screen.classList.remove('hide');
+
+      try {
+        status.textContent = 'Mengambil Summary2026...';
+        const sumRows = await fetchSheet('Summary2026');
+
+        status.textContent = 'Mengambil AnggaranRealisasi2026...';
+        const arRows = await fetchSheet('AnggaranRealisasi2026');
+
+        status.textContent = 'Memproses data...';
+        renderAll(sumRows, arRows);
+
+        screen.classList.add('hide');
+        showSlide(current);
+      } catch (err) {
+        screen.classList.add('hide');
+        const b = document.getElementById('error-banner');
+        b.textContent = '⚠️ Gagal memuat data: ' + err.message + '. Klik 🔄 untuk coba lagi.';
+        b.style.display = 'block';
+        setTimeout(() => b.style.display = 'none', 7000);
+        showSlide(current);
+        console.error(err);
+      }
+    }
+
+    // ══════════════════════════════════════════════
+    // NAVIGASI
+    // ══════════════════════════════════════════════
+    function showSlide(n) {
+      slides.forEach((s, i) => s.style.display = i === n ? 'flex' : 'none');
+      document.getElementById('nav-info').textContent = `${n + 1} / ${totalSlides}`;
+    }
+    function nextSlide() { if (current < totalSlides - 1) { current++; showSlide(current); } }
+    function prevSlide() { if (current > 0) { current--; showSlide(current); } }
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextSlide();
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') prevSlide();
+    });
+
+    // ══════════════════════════════════════════════
+    // PRINT & PDF
+    // ══════════════════════════════════════════════
+    function printAll() {
+      slides.forEach(s => s.style.display = 'flex');
+      window.print();
+      showSlide(current);
+    }
+
+    async function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const ov = document.getElementById('pdf-overlay');
+      const prog = document.getElementById('pdf-progress');
+      ov.classList.add('show');
+      const saved = current;
+      const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [1280, 720] });
+
+      for (let i = 0; i < totalSlides; i++) {
+        prog.textContent = `Memproses slide ${i + 1} / ${totalSlides}`;
+        slides.forEach((s, idx) => s.style.display = idx === i ? 'flex' : 'none');
+        await new Promise(r => setTimeout(r, 350));
+        const canvas = await html2canvas(slides[i], {
+          scale: 2, useCORS: true, backgroundColor: null, logging: false, width: 1280, height: 720
+        });
+        if (i > 0) pdf.addPage([1280, 720], 'landscape');
+        pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, 1280, 720);
+      }
+
+      prog.textContent = 'Menyimpan file...';
+      pdf.save('Anggaran_Romadan_TA2026.pdf');
+      ov.classList.remove('show');
+      showSlide(saved);
+    }
+
+    // ══════════════════════════════════════════════
+    // INIT
+    // ══════════════════════════════════════════════
+    loadData();
+  </script>
 </body>
+
 </html>
