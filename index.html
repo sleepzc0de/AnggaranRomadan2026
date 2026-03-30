@@ -2,431 +2,465 @@
 <html lang="id" data-theme="dark">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Anggaran Romadan TA 2026</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-/* ══════════════════════════════════════════
-   THEME TOKENS
-══════════════════════════════════════════ */
 :root{
-  --nav-h:56px;
-  --sw:1280px;--sh:720px;--sf:1;
+  --nav-h:58px;--sw:1280px;--sh:720px;--sf:1;
+  --accent:#f0a500;--accent2:#e67e22;
+  --anim:.36s cubic-bezier(.4,0,.2,1);
 }
 [data-theme="dark"]{
-  --bg:#1a1a2e;--bg2:#16213e;--bg3:#0f2040;
-  --slide-cover:linear-gradient(135deg,#0d2e55 0%,#16213e 50%,#0d2e55 100%);
-  --slide-dark:linear-gradient(135deg,#16213e 0%,#1a1a2e 100%);
-  --card-bg:rgba(255,255,255,.045);--card-border:rgba(255,255,255,.09);
-  --text:#fff;--text2:rgba(255,255,255,.7);--text3:rgba(255,255,255,.45);--text4:rgba(255,255,255,.22);
-  --badge-bg:rgba(255,255,255,.07);--badge-border:rgba(255,255,255,.14);
-  --table-head:rgba(240,165,0,.09);--table-hover:rgba(255,255,255,.045);
-  --prog-bg:rgba(255,255,255,.07);
-  --nav-bg:rgba(8,12,24,.92);--nav-border:rgba(255,255,255,.07);
-  --nav-btn:rgba(255,255,255,.08);--nav-btn-border:rgba(255,255,255,.18);
-  --sep:rgba(255,255,255,.15);--dot:rgba(255,255,255,.2);
-  --point-bg:rgba(255,255,255,.03);--point-border:rgba(255,255,255,.06);
-  --skel1:rgba(255,255,255,.06);--skel2:rgba(255,255,255,.1);
-  --pdf-bar-bg:rgba(255,255,255,.1);--akun-badge:rgba(255,255,255,.07);
-  --ts:rgba(255,255,255,.22);
-  --cover-orb1:rgba(255,255,255,.025);--cover-orb2:rgba(240,165,0,.035);
-  --bg-capture:#1a1a2e;
+  --bg:#0d0d1a;--glass:rgba(255,255,255,.045);--glass2:rgba(255,255,255,.08);
+  --gb:rgba(255,255,255,.08);--gb2:rgba(255,255,255,.15);
+  --cover-bg:linear-gradient(135deg,#0a1628 0%,#111827 45%,#0d1f3c 100%);
+  --slide-bg:linear-gradient(160deg,#0d0d1a 0%,#10142a 100%);
+  --t1:#f0f0f8;--t2:rgba(240,240,248,.75);--t3:rgba(240,240,248,.48);--t4:rgba(240,240,248,.22);
+  --thead:rgba(240,165,0,.07);--thover:rgba(255,255,255,.04);
+  --pb:rgba(255,255,255,.07);
+  --navbg:rgba(8,8,20,.9);--navb:rgba(255,255,255,.07);
+  --nb:rgba(255,255,255,.07);--nb2:rgba(255,255,255,.16);
+  --sep:rgba(255,255,255,.13);--dot:rgba(255,255,255,.2);
+  --sk1:rgba(255,255,255,.06);--sk2:rgba(255,255,255,.1);
+  --tsc:rgba(255,255,255,.22);--bgcap:#0d0d1a;
+  --orb1:rgba(240,165,0,.055);--orb2:rgba(52,152,219,.065);--orb3:rgba(155,89,182,.045);
 }
 [data-theme="light"]{
-  --bg:#f0f4f8;--bg2:#e2eaf4;--bg3:#d5e0ef;
-  --slide-cover:linear-gradient(135deg,#1a4a8a 0%,#1d3f7a 50%,#1a4a8a 100%);
-  --slide-dark:linear-gradient(135deg,#ffffff 0%,#f0f4f8 100%);
-  --card-bg:rgba(255,255,255,.9);--card-border:rgba(0,0,0,.08);
-  --text:#1a2340;--text2:#2c3e60;--text3:#5a6a88;--text4:#9aabcc;
-  --badge-bg:rgba(255,255,255,.18);--badge-border:rgba(255,255,255,.35);
-  --table-head:rgba(180,120,0,.07);--table-hover:rgba(0,0,0,.04);
-  --prog-bg:rgba(0,0,0,.07);
-  --nav-bg:rgba(240,244,248,.96);--nav-border:rgba(0,0,0,.09);
-  --nav-btn:rgba(0,0,0,.06);--nav-btn-border:rgba(0,0,0,.14);
-  --sep:rgba(0,0,0,.14);--dot:rgba(0,0,0,.18);
-  --point-bg:rgba(0,0,0,.025);--point-border:rgba(0,0,0,.07);
-  --skel1:rgba(0,0,0,.06);--skel2:rgba(0,0,0,.1);
-  --pdf-bar-bg:rgba(0,0,0,.1);--akun-badge:rgba(0,0,0,.07);
-  --ts:#5a6a88;
-  --cover-orb1:rgba(255,255,255,.06);--cover-orb2:rgba(240,165,0,.06);
-  --bg-capture:#f0f4f8;
+  --bg:#f3f5fb;--glass:rgba(255,255,255,.9);--glass2:rgba(255,255,255,.98);
+  --gb:rgba(0,0,0,.07);--gb2:rgba(0,0,0,.13);
+  --cover-bg:linear-gradient(135deg,#1a3a6e 0%,#1d3d7a 45%,#142e5e 100%);
+  --slide-bg:linear-gradient(160deg,#f3f5fb 0%,#e9edf6 100%);
+  --t1:#1a1e36;--t2:#2d3460;--t3:#6878a0;--t4:#b0bcd8;
+  --thead:rgba(180,120,0,.05);--thover:rgba(0,0,0,.03);
+  --pb:rgba(0,0,0,.07);
+  --navbg:rgba(243,245,251,.95);--navb:rgba(0,0,0,.08);
+  --nb:rgba(0,0,0,.05);--nb2:rgba(0,0,0,.14);
+  --sep:rgba(0,0,0,.13);--dot:rgba(0,0,0,.18);
+  --sk1:rgba(0,0,0,.05);--sk2:rgba(0,0,0,.09);
+  --tsc:#8090b0;--bgcap:#f3f5fb;
+  --orb1:rgba(240,165,0,.07);--orb2:rgba(52,152,219,.08);--orb3:rgba(155,89,182,.06);
 }
-
-/* ══════════════════════════════════════════
-   RESET
-══════════════════════════════════════════ */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{
-  width:100%;min-height:100%;
-  font-family:'Segoe UI',system-ui,sans-serif;
-  background:var(--bg);color:var(--text);
-  overflow-x:hidden;transition:background .3s,color .3s;
+  width:100%;height:100%;
+  font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+  background:var(--bg);color:var(--t1);
+  overflow:hidden;transition:background .3s,color .3s;
 }
 
-/* ══════════════════════════════════════════
-   STAGE & SCALE
-══════════════════════════════════════════ */
+/* ══ STAGE ══ */
 #stage{
-  width:100%;padding-bottom:calc(var(--nav-h) + 12px);
-  display:flex;align-items:flex-start;justify-content:center;
-  min-height:100dvh;
+  position:fixed;inset:0 0 var(--nav-h) 0;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--bg);overflow:hidden;
 }
 .slide-wrap{
-  width:var(--sw);
-  transform-origin:top center;
-  transform:scale(var(--sf));
-}
-
-/* Fullscreen: hide nav, recalc scale via JS */
-:fullscreen #stage,
-:-webkit-full-screen #stage,
-:-moz-full-screen #stage{
-  min-height:100vh;background:var(--bg);
-}
-:fullscreen .nav,
-:-webkit-full-screen .nav,
-:-moz-full-screen .nav{
-  /* Keep nav visible inside fullscreen container */
-  position:fixed;bottom:0;left:0;right:0;
-}
-/* Fade nav in fullscreen on idle */
-body.fs-idle .nav{
-  opacity:0;pointer-events:none;
-  transition:opacity .5s ease;
-}
-body:not(.fs-idle) .nav{
-  opacity:1;pointer-events:auto;
-  transition:opacity .25s ease;
-}
-
-/* ══════════════════════════════════════════
-   SLIDES
-══════════════════════════════════════════ */
-.slide{
   width:var(--sw);height:var(--sh);
-  padding:52px 58px;
+  transform-origin:center center;
+  transform:scale(var(--sf));
+  position:relative;will-change:transform;
+}
+
+/* ══ SLIDES ══ */
+.slide{
+  position:absolute;inset:0;padding:44px 52px;
   display:none;flex-direction:column;justify-content:center;
-  position:relative;overflow:hidden;
-  opacity:0;transform:translateY(14px);
-  transition:opacity .38s ease,transform .38s ease;
+  opacity:0;transform:translateX(28px) scale(.988);
+  transition:opacity var(--anim),transform var(--anim);
+  overflow:hidden;
 }
-.slide.active{display:flex;opacity:1;transform:translateY(0)}
-.slide-cover{
-  background:var(--slide-cover);
-  align-items:center;text-align:center;
-}
-.slide-cover::before{
-  content:'';position:absolute;width:550px;height:550px;border-radius:50%;
-  background:var(--cover-orb1);top:-180px;right:-90px;pointer-events:none;
-}
-.slide-cover::after{
-  content:'';position:absolute;width:380px;height:380px;border-radius:50%;
-  background:var(--cover-orb2);bottom:-130px;left:-70px;pointer-events:none;
-}
-.slide-dark{background:var(--slide-dark)}
+.slide.active{display:flex;opacity:1;transform:none}
+.slide-cover{background:var(--cover-bg)}
+.slide-dark{background:var(--slide-bg)}
 
-.slide-cover .badge,.slide-cover .cover-title,.slide-cover .cover-sub,
-.slide-cover .footer-slide,.slide-cover .ts-label{color:#fff!important;border-color:rgba(255,255,255,.22)!important}
-.slide-cover .cover-sub{color:rgba(255,255,255,.65)!important}
-.slide-cover .footer-slide{color:rgba(255,255,255,.18)!important}
-.slide-cover .ts-label{color:rgba(255,255,255,.25)!important}
-
-/* ══════════════════════════════════════════
-   COVER ELEMENTS
-══════════════════════════════════════════ */
-.badge{
-  background:var(--badge-bg);border:1px solid var(--badge-border);color:var(--text2);
-  padding:7px 22px;border-radius:20px;font-size:11px;letter-spacing:2px;
-  margin-bottom:22px;display:inline-block;
+/* ══ AMBIENT ORBS ══ */
+.slide::before,.slide::after{
+  content:'';position:absolute;border-radius:50%;
+  pointer-events:none;filter:blur(70px);
 }
-.cover-title{font-size:42px;font-weight:700;line-height:1.2;margin-bottom:10px;color:#fff}
-.cover-title span{color:#f0a500}
-.cover-sub{font-size:14px;margin-bottom:28px}
-.cover-boxes{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
-.cover-box{
-  padding:15px 24px;border-radius:14px;text-align:center;min-width:175px;
-  transition:transform .2s,box-shadow .2s;cursor:default;
+.slide-cover::before{width:520px;height:520px;background:var(--orb2);top:-160px;right:-110px;opacity:.8}
+.slide-cover::after{width:420px;height:420px;background:var(--orb1);bottom:-130px;left:-80px;opacity:.8}
+.slide-dark::before{width:620px;height:620px;background:var(--orb3);top:-210px;right:-160px}
+.slide-dark::after{width:420px;height:420px;background:var(--orb1);bottom:-160px;left:-100px}
+
+/* ══ GRID DECO ══ */
+.grid-deco{
+  position:absolute;inset:0;pointer-events:none;opacity:.035;
+  background-image:
+    linear-gradient(rgba(255,255,255,.5) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.5) 1px,transparent 1px);
+  background-size:80px 80px;
 }
-.cover-box:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(0,0,0,.25)}
-.cover-box.gold{background:linear-gradient(135deg,#f0a500,#e67e22)}
-.cover-box.teal{background:linear-gradient(135deg,#00b894,#00796b)}
-.cover-box.blue2{background:linear-gradient(135deg,#3498db,#2980b9)}
-.cover-box.purple{background:linear-gradient(135deg,#9b59b6,#8e44ad)}
-.cover-box .lbl{font-size:9px;opacity:.88;letter-spacing:1.5px;margin-bottom:4px;text-transform:uppercase;color:#fff}
-.cover-box .amt{font-size:21px;font-weight:700;color:#fff}
 
-/* ══════════════════════════════════════════
-   SECTION HEADINGS
-══════════════════════════════════════════ */
-.stitle{font-size:11px;letter-spacing:3px;color:#f0a500;text-transform:uppercase;margin-bottom:5px}
-.sheading{font-size:28px;font-weight:700;margin-bottom:12px;color:var(--text)}
-.divider{width:46px;height:4px;background:#f0a500;border-radius:2px;margin-bottom:18px}
-.footer-slide{position:absolute;bottom:14px;right:32px;font-size:10px;color:var(--text4)}
-.ts-label{position:absolute;bottom:14px;left:32px;font-size:10px;color:var(--ts)}
+/* ══ COVER ══ */
+.cover-eyebrow{
+  display:inline-flex;align-items:center;gap:9px;
+  background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.15);
+  color:rgba(255,255,255,.78);padding:7px 20px;border-radius:30px;
+  font-size:11px;letter-spacing:2.5px;text-transform:uppercase;
+  margin-bottom:26px;font-weight:500;
+}
+.cover-eyebrow .dot{
+  width:7px;height:7px;border-radius:50%;background:#f0a500;
+  animation:blink 2s ease-in-out infinite;flex-shrink:0;
+}
+@keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.6)}}
+.cover-title{font-size:50px;font-weight:700;line-height:1.13;color:#fff;margin-bottom:12px;letter-spacing:-.6px}
+.cover-title em{font-style:normal;color:#f0a500}
+.cover-sub{font-size:14.5px;color:rgba(255,255,255,.55);margin-bottom:34px;letter-spacing:.3px}
+.cover-kpi{display:flex;gap:13px;flex-wrap:wrap;justify-content:center}
+.kpi{
+  display:flex;flex-direction:column;gap:6px;
+  padding:18px 24px;border-radius:16px;min-width:175px;text-align:center;
+  border:1px solid rgba(255,255,255,.1);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  transition:transform .22s,box-shadow .22s;cursor:default;
+  background:rgba(255,255,255,.07);
+}
+.kpi:hover{transform:translateY(-4px);box-shadow:0 18px 44px rgba(0,0,0,.45)}
+.kpi.k-gold{background:linear-gradient(135deg,rgba(240,165,0,.2),rgba(230,126,34,.13))}
+.kpi.k-teal{background:linear-gradient(135deg,rgba(0,184,148,.2),rgba(0,121,107,.13))}
+.kpi.k-purple{background:linear-gradient(135deg,rgba(155,89,182,.2),rgba(142,68,173,.13))}
+.kpi.k-blue{background:linear-gradient(135deg,rgba(52,152,219,.2),rgba(41,128,185,.13))}
+.kpi .klbl{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:rgba(255,255,255,.52);font-weight:600}
+.kpi .kamt{font-size:23px;font-weight:700;color:#fff;letter-spacing:-.3px}
 
-/* ══════════════════════════════════════════
-   CARDS
-══════════════════════════════════════════ */
-.cards{display:flex;gap:12px}
+/* ══ SECTION HEADER ══ */
+.stitle{
+  display:inline-flex;align-items:center;gap:7px;
+  font-size:11px;letter-spacing:2.5px;color:var(--accent);
+  text-transform:uppercase;margin-bottom:5px;font-weight:700;
+}
+.stitle::before{content:'';width:18px;height:2.5px;background:var(--accent);border-radius:2px}
+.sheading{font-size:28px;font-weight:700;margin-bottom:14px;color:var(--t1);letter-spacing:-.3px;line-height:1.2}
+.footer-slide{position:absolute;bottom:13px;right:30px;font-size:10.5px;color:var(--t4);letter-spacing:1.2px;text-transform:uppercase}
+.ts-label{position:absolute;bottom:13px;left:30px;font-size:10.5px;color:var(--tsc)}
+.slide-num{
+  position:absolute;top:16px;right:20px;
+  background:rgba(240,165,0,.1);border:1px solid rgba(240,165,0,.22);
+  padding:4px 11px;border-radius:20px;
+  font-size:10px;color:var(--accent);font-weight:700;letter-spacing:1px;
+}
+
+/* ══ GLASS CARDS ══ */
+.cards{display:flex;gap:13px}
 .card{
-  flex:1;background:var(--card-bg);border:1px solid var(--card-border);
-  border-radius:14px;padding:18px;position:relative;overflow:hidden;
-  transition:transform .2s,box-shadow .2s,background .3s;cursor:default;
+  flex:1;background:var(--glass);border:1px solid var(--gb);
+  border-radius:16px;padding:20px 21px;position:relative;overflow:hidden;
+  transition:transform .22s,box-shadow .22s;cursor:default;
 }
-.card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.15)}
-.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.card:hover{transform:translateY(-3px);box-shadow:0 12px 36px rgba(0,0,0,.2)}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:16px 16px 0 0}
 .card.gold::before{background:linear-gradient(90deg,#f0a500,#e67e22)}
 .card.blue::before{background:linear-gradient(90deg,#3498db,#2980b9)}
-.card.green::before{background:linear-gradient(90deg,#2ecc71,#27ae60)}
+.card.green::before{background:linear-gradient(90deg,#00b894,#00796b)}
 .card.red::before{background:linear-gradient(90deg,#e74c3c,#c0392b)}
 .card.purple::before{background:linear-gradient(90deg,#9b59b6,#8e44ad)}
-.card-icon{font-size:22px;margin-bottom:7px}
-.card-lbl{font-size:9px;color:var(--text3);margin-bottom:3px;letter-spacing:1px;text-transform:uppercase}
-.card-val{font-size:18px;font-weight:700}
-.card-val.gold{color:#e69500}
-.card-val.blue{color:#2980b9}
-.card-val.green{color:#27ae60}
-.card-val.red{color:#c0392b}
-.card-val.purple{color:#8e44ad}
-[data-theme="dark"] .card-val.gold{color:#f0a500}
-[data-theme="dark"] .card-val.blue{color:#3498db}
-[data-theme="dark"] .card-val.green{color:#2ecc71}
-[data-theme="dark"] .card-val.red{color:#e74c3c}
-[data-theme="dark"] .card-val.purple{color:#9b59b6}
-.card-note{font-size:10px;color:var(--text3);margin-top:4px}
+.card-icon{font-size:23px;margin-bottom:8px;display:block}
+.card-lbl{font-size:10px;color:var(--t3);margin-bottom:4px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700}
+.card-val{font-size:19px;font-weight:700;letter-spacing:-.2px}
+.card-val.gold{color:#f0a500}
+.card-val.blue{color:#3498db}
+.card-val.green{color:#00b894}
+.card-val.red{color:#e74c3c}
+.card-val.purple{color:#9b59b6}
+[data-theme="light"] .card-val.gold{color:#a07000}
+[data-theme="light"] .card-val.blue{color:#1a6fa8}
+[data-theme="light"] .card-val.green{color:#006e55}
+[data-theme="light"] .card-val.red{color:#a02020}
+[data-theme="light"] .card-val.purple{color:#6e3090}
+.card-note{font-size:11px;color:var(--t3);margin-top:5px}
 
-/* ══════════════════════════════════════════
-   PROGRESS BARS
-══════════════════════════════════════════ */
-.prog-row{margin-bottom:10px}
-.prog-header{display:flex;justify-content:space-between;margin-bottom:4px;gap:8px}
-.prog-name{font-size:11.5px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.prog-vals{font-size:10.5px;color:var(--text3);flex-shrink:0}
-.prog-bar{height:7px;background:var(--prog-bg);border-radius:4px;overflow:hidden}
-.prog-fill{height:100%;border-radius:4px;width:0;transition:width .85s cubic-bezier(.25,.46,.45,.94)}
+/* ══ STAT ROW ══ */
+.stat-row{display:flex;gap:10px;margin-top:11px}
+.stat-item{
+  flex:1;background:var(--glass);border:1px solid var(--gb);
+  border-radius:11px;padding:11px 14px;text-align:center;
+}
+.stat-lbl{font-size:10px;color:var(--t3);letter-spacing:1.2px;text-transform:uppercase;font-weight:700;margin-bottom:4px}
+.stat-val{font-size:16px;font-weight:700;color:var(--t1)}
+.stat-sub{font-size:10.5px;color:var(--t3);margin-top:2px}
 
-/* ══════════════════════════════════════════
-   TABLE
-══════════════════════════════════════════ */
+/* ══ PROGRESS BARS ══ */
+.prog-row{margin-bottom:12px}
+.prog-header{display:flex;justify-content:space-between;margin-bottom:5px;gap:8px;align-items:center}
+.prog-name{font-size:12px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
+.prog-vals{font-size:11px;color:var(--t3);flex-shrink:0;white-space:nowrap}
+.prog-bar{height:9px;background:var(--pb);border-radius:6px;overflow:hidden}
+.prog-fill{height:100%;border-radius:6px;width:0;transition:width .9s cubic-bezier(.22,.61,.36,1)}
+
+/* ══ TABLE ══ */
 table{width:100%;border-collapse:collapse}
-thead tr{background:var(--table-head);border-bottom:2px solid #f0a500}
-thead th{padding:8px 10px;font-size:10.5px;letter-spacing:.7px;color:#f0a500;text-align:left;white-space:nowrap}
+thead tr{background:var(--thead)}
+thead th{
+  padding:9px 11px;font-size:11px;letter-spacing:.8px;
+  color:var(--accent);text-align:left;white-space:nowrap;
+  font-weight:700;text-transform:uppercase;
+  border-bottom:2px solid rgba(240,165,0,.35);
+}
 thead th.r{text-align:right}
-tbody tr{border-bottom:1px solid var(--card-border);transition:background .15s}
-tbody tr:hover{background:var(--table-hover)}
-tbody td{padding:7px 10px;font-size:11px;color:var(--text2)}
-tbody td.r{text-align:right;font-weight:600;color:var(--text)}
-tfoot tr{background:var(--table-head);border-top:2px solid #f0a500}
-tfoot td{padding:9px 10px;font-weight:700;color:#f0a500;font-size:11.5px}
-tfoot td.r{text-align:right}
-.akun-badge{background:var(--akun-badge);padding:2px 6px;border-radius:5px;font-size:10px;font-family:monospace;color:var(--text2)}
-.pct-pill{display:inline-block;padding:2px 6px;border-radius:10px;font-size:10px;font-weight:700}
-.pct-pill.low{background:rgba(192,57,43,.15);color:#c0392b}
-.pct-pill.mid{background:rgba(211,84,0,.15);color:#d35400}
-.pct-pill.high{background:rgba(39,174,96,.15);color:#27ae60}
-[data-theme="dark"] .pct-pill.low{background:rgba(231,76,60,.18);color:#e74c3c}
-[data-theme="dark"] .pct-pill.mid{background:rgba(243,156,18,.18);color:#f39c12}
-[data-theme="dark"] .pct-pill.high{background:rgba(46,204,113,.18);color:#2ecc71}
-
-/* ══════════════════════════════════════════
-   BAR CHART
-══════════════════════════════════════════ */
-.month-bars{display:flex;gap:8px;align-items:flex-end;height:175px}
-.month-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
-.bar-wrap{width:100%;display:flex;flex-direction:column;justify-content:flex-end;height:138px}
-.bar{
-  width:100%;border-radius:5px 5px 0 0;
-  display:flex;align-items:flex-end;justify-content:center;padding-bottom:2px;
-  font-size:8.5px;font-weight:700;color:#fff;height:0;
-  transition:height .72s cubic-bezier(.25,.46,.45,.94);
-  cursor:pointer;position:relative;
+tbody tr{border-bottom:1px solid var(--gb);transition:background .12s}
+tbody tr:hover{background:var(--thover)}
+tbody td{padding:8px 11px;font-size:12px;color:var(--t2)}
+tbody td.r{text-align:right;font-weight:600;color:var(--t1);font-size:12px}
+tfoot tr{background:rgba(240,165,0,.08);border-top:2px solid rgba(240,165,0,.35)}
+tfoot td{padding:10px 11px;font-weight:700;font-size:12.5px}
+tfoot td.r{text-align:right;color:var(--accent)}
+.akun-badge{
+  background:rgba(240,165,0,.11);border:1px solid rgba(240,165,0,.22);
+  padding:2px 7px;border-radius:6px;
+  font-size:10.5px;font-family:monospace;color:var(--accent);font-weight:700;
 }
-.bar:hover::after{
-  content:attr(data-tip);position:absolute;bottom:calc(100% + 5px);left:50%;
-  transform:translateX(-50%);background:rgba(0,0,0,.88);color:#fff;
-  font-size:10px;padding:4px 8px;border-radius:6px;white-space:nowrap;
-  pointer-events:none;z-index:20;
+.pct-pill{
+  display:inline-flex;align-items:center;gap:3px;
+  padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700;
 }
-.month-lbl{font-size:9.5px;color:var(--text3)}
-.month-amt{font-size:9px;font-weight:700;color:var(--text2);text-align:center}
+.pct-pill::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.pct-pill.low{background:rgba(231,76,60,.13);color:#e74c3c}
+.pct-pill.low::before{background:#e74c3c}
+.pct-pill.mid{background:rgba(243,156,18,.13);color:#e67e22}
+.pct-pill.mid::before{background:#e67e22}
+.pct-pill.high{background:rgba(0,184,148,.13);color:#00b894}
+.pct-pill.high::before{background:#00b894}
+.pct-pill.over{background:rgba(52,152,219,.13);color:#3498db}
+.pct-pill.over::before{background:#3498db}
+[data-theme="light"] .pct-pill.low{color:#a02020}
+[data-theme="light"] .pct-pill.mid{color:#904e00}
+[data-theme="light"] .pct-pill.high{color:#006e55}
+[data-theme="light"] .pct-pill.over{color:#1a6fa8}
 
-/* ══════════════════════════════════════════
-   POINTS
-══════════════════════════════════════════ */
+/* ══ SLIDE 3 CHART ══ */
+.chart-grid-wrap{display:flex;gap:14px;align-items:flex-start;flex:1;min-height:0}
+.chart-main-area{flex:1;min-width:0;display:flex;flex-direction:column}
+.chart-side-col{width:222px;flex-shrink:0;display:flex;flex-direction:column;gap:8px}
+.toggle-row{display:flex;gap:7px;margin-bottom:8px}
+.tog-btn{
+  font-size:10px;padding:4px 12px;border-radius:20px;
+  border:1px solid var(--gb2);background:var(--nb);color:var(--t3);
+  cursor:pointer;transition:all .15s;font-weight:700;letter-spacing:.5px;
+  font-family:'Segoe UI',system-ui,sans-serif;
+}
+.tog-btn.active{background:var(--accent);color:#000;border-color:var(--accent)}
+.tog-btn:hover:not(.active){background:var(--glass2);color:var(--t1)}
+.legend-strip{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:7px;font-size:10px;color:var(--t3)}
+.leg-item{display:flex;align-items:center;gap:5px}
+.leg-sq{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.leg-ln{width:18px;height:2.5px;border-radius:2px;flex-shrink:0}
+.chart-canvas-wrap{position:relative;width:100%;height:200px}
+.chart-axis-note{font-size:9px;color:var(--t4);margin-top:5px;text-align:right;letter-spacing:.4px}
+.side-card{
+  background:var(--glass);border:1px solid var(--gb);
+  border-radius:12px;padding:11px 14px;position:relative;overflow:hidden;
+}
+.side-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2.5px}
+.side-card.sc-gold::before{background:linear-gradient(90deg,#f0a500,#e67e22)}
+.side-card.sc-blue::before{background:linear-gradient(90deg,#3498db,#2980b9)}
+.side-card.sc-green::before{background:linear-gradient(90deg,#00b894,#00796b)}
+.side-card.sc-purple::before{background:linear-gradient(90deg,#9b59b6,#8e44ad)}
+.sc-lbl{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);font-weight:700;margin-bottom:3px}
+.sc-val{font-size:14px;font-weight:700;letter-spacing:-.2px}
+.sc-val.gold{color:#f0a500}
+.sc-val.blue{color:#3498db}
+.sc-val.green{color:#00b894}
+.sc-val.purple{color:#9b59b6}
+[data-theme="light"] .sc-val.gold{color:#a07000}
+[data-theme="light"] .sc-val.blue{color:#1a6fa8}
+[data-theme="light"] .sc-val.green{color:#006e55}
+[data-theme="light"] .sc-val.purple{color:#6e3090}
+.sc-sub{font-size:9.5px;color:var(--t3);margin-top:2px}
+
+/* ══ POINTS ══ */
 .points{display:flex;flex-direction:column;gap:10px}
 .point{
   display:flex;align-items:flex-start;gap:13px;
-  background:var(--point-bg);border:1px solid var(--point-border);
-  border-radius:10px;padding:12px 15px;
-  transition:border-color .2s,background .2s;
+  background:var(--glass);border:1px solid var(--gb);
+  border-radius:13px;padding:12px 16px;
+  transition:border-color .2s,background .2s,transform .2s;
 }
-.point:hover{background:var(--card-bg);border-color:rgba(240,165,0,.3)}
-.point-icon{font-size:20px;flex-shrink:0;margin-top:1px}
-.point-text strong{display:block;font-size:12.5px;color:#e69500;margin-bottom:2px}
-[data-theme="dark"] .point-text strong{color:#f0a500}
-.point-text p{font-size:11.5px;color:var(--text3);line-height:1.55}
+.point:hover{background:var(--glass2);border-color:rgba(240,165,0,.28);transform:translateX(4px)}
+.point-icon{
+  width:36px;height:36px;border-radius:10px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:17px;
+}
+.point-icon.gi{background:rgba(0,184,148,.13)}
+.point-icon.ya{background:rgba(240,165,0,.13)}
+.point-icon.re{background:rgba(231,76,60,.13)}
+.point-icon.bl{background:rgba(52,152,219,.13)}
+.point-icon.pu{background:rgba(155,89,182,.13)}
+.point-text strong{display:block;font-size:13px;color:var(--accent);margin-bottom:3px;font-weight:700}
+.point-text p{font-size:12px;color:var(--t3);line-height:1.58}
 
-/* ══════════════════════════════════════════
-   SKELETON
-══════════════════════════════════════════ */
+/* ══ SKELETON ══ */
 .skel{
-  background:linear-gradient(90deg,var(--skel1) 25%,var(--skel2) 50%,var(--skel1) 75%);
-  background-size:200% 100%;animation:skel-wave 1.4s infinite;
-  border-radius:5px;display:inline-block;
+  background:linear-gradient(90deg,var(--sk1) 25%,var(--sk2) 50%,var(--sk1) 75%);
+  background-size:200% 100%;animation:skw 1.5s infinite;
+  border-radius:4px;display:inline-block;
 }
-@keyframes skel-wave{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes skw{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
-/* ══════════════════════════════════════════
-   INIT SCREEN
-══════════════════════════════════════════ */
+/* ══ INIT ══ */
 #init-screen{
   position:fixed;inset:0;background:var(--bg);z-index:99999;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
-  transition:opacity .4s ease,background .3s;
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:20px;transition:opacity .5s ease;
 }
 #init-screen.fade-out{opacity:0;pointer-events:none}
-#init-screen.hide{display:none}
-.spinner{width:48px;height:48px;border-radius:50%;border:4px solid var(--prog-bg);border-top-color:#f0a500;animation:spin .72s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-#init-screen p{font-size:15px;color:var(--text2)}
-#init-screen .sub{font-size:12px;color:#f0a500}
-.init-dots{display:flex;gap:7px;margin-top:2px}
-.init-dot{width:7px;height:7px;border-radius:50%;background:var(--dot);animation:pulse-dot 1.4s ease-in-out infinite}
-.init-dot:nth-child(2){animation-delay:.2s}
-.init-dot:nth-child(3){animation-delay:.4s}
-@keyframes pulse-dot{0%,80%,100%{opacity:.2}40%{opacity:1;background:#f0a500}}
+#init-screen.hide{display:none!important}
+.logo-init{
+  width:64px;height:64px;border-radius:20px;
+  background:linear-gradient(135deg,rgba(240,165,0,.22),rgba(230,126,34,.12));
+  border:1px solid rgba(240,165,0,.28);
+  display:flex;align-items:center;justify-content:center;
+  font-size:28px;margin-bottom:4px;
+}
+#init-screen h2{font-size:16px;font-weight:700;color:var(--t1);letter-spacing:-.2px}
+.init-sub{font-size:12.5px;color:var(--accent);font-weight:600}
+.init-status-line{font-size:11.5px;color:var(--t3)}
+.init-bar-wrap{width:220px;height:3px;background:var(--pb);border-radius:2px;overflow:hidden}
+.init-bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width .4s ease}
 
-/* ══════════════════════════════════════════
-   TOAST
-══════════════════════════════════════════ */
+/* ══ TOAST ══ */
 #toast{
-  position:fixed;top:18px;left:50%;
-  transform:translateX(-50%) translateY(-70px);
-  padding:10px 24px;border-radius:10px;font-size:13px;z-index:99998;
-  box-shadow:0 4px 24px rgba(0,0,0,.3);
-  transition:transform .32s cubic-bezier(.34,1.56,.64,1);
-  pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center;
+  position:fixed;top:20px;left:50%;
+  transform:translateX(-50%) translateY(-80px);
+  padding:10px 24px;border-radius:12px;font-size:13px;z-index:99998;
+  box-shadow:0 8px 32px rgba(0,0,0,.35);
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+  pointer-events:none;white-space:nowrap;max-width:90vw;
+  text-align:center;font-weight:600;
 }
 #toast.show{transform:translateX(-50%) translateY(0)}
 #toast.err{background:#e74c3c;color:#fff}
-#toast.ok{background:#27ae60;color:#fff}
-#toast.info{background:#2980b9;color:#fff}
+#toast.ok{background:#00b894;color:#fff}
+#toast.info{background:#3498db;color:#fff}
+#toast.warn{background:#f0a500;color:#000}
 
-/* ══════════════════════════════════════════
-   FULLSCREEN HINT OVERLAY
-   Shown briefly when entering fullscreen
-══════════════════════════════════════════ */
+/* ══ FS HINT ══ */
 #fs-hint{
-  position:fixed;bottom:calc(var(--nav-h) + 14px);left:50%;
-  transform:translateX(-50%) translateY(10px);
-  background:rgba(0,0,0,.72);color:rgba(255,255,255,.85);
-  padding:8px 18px;border-radius:20px;font-size:12px;
+  position:fixed;bottom:calc(var(--nav-h) + 16px);left:50%;
+  transform:translateX(-50%) translateY(8px);
+  background:rgba(0,0,0,.82);color:rgba(255,255,255,.9);
+  padding:7px 17px;border-radius:20px;font-size:12px;
   z-index:9990;pointer-events:none;
-  opacity:0;transition:opacity .3s ease,transform .3s ease;
-  white-space:nowrap;
+  opacity:0;transition:opacity .3s,transform .3s;
+  white-space:nowrap;backdrop-filter:blur(10px);
 }
 #fs-hint.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-/* ══════════════════════════════════════════
-   PDF OVERLAY
-══════════════════════════════════════════ */
+/* ══ PDF OVERLAY ══ */
 #pdf-ov{
-  display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);
-  z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.92);z-index:9999;
+  flex-direction:column;align-items:center;justify-content:center;gap:18px;
 }
 #pdf-ov.show{display:flex}
-#pdf-ov p{font-size:15px;color:rgba(255,255,255,.65)}
-.prog-text{font-size:12px;color:#f0a500}
-#pdf-bar-wrap{width:min(340px,80vw);height:6px;background:var(--pdf-bar-bg);border-radius:3px;overflow:hidden}
-#pdf-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,#f0a500,#e67e22);border-radius:3px;transition:width .28s ease}
+.pdf-card{
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);
+  border-radius:20px;padding:36px 52px;
+  display:flex;flex-direction:column;align-items:center;
+  gap:14px;min-width:320px;
+}
+.pdf-card p{font-size:15px;color:rgba(255,255,255,.72);font-weight:500}
+.pdf-prog-text{font-size:12.5px;color:var(--accent);font-weight:700}
+#pdf-bar-wrap{width:260px;height:5px;background:rgba(255,255,255,.12);border-radius:3px;overflow:hidden}
+#pdf-bar-fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px;transition:width .3s ease}
+.ring{
+  width:48px;height:48px;border-radius:50%;
+  border:3px solid rgba(240,165,0,.2);border-top-color:var(--accent);
+  animation:spin .7s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-/* ══════════════════════════════════════════
-   NAV BAR
-══════════════════════════════════════════ */
+/* ══ NAV ══ */
 .nav{
   position:fixed;bottom:0;left:0;right:0;
-  height:var(--nav-h);
-  background:var(--nav-bg);
-  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
-  border-top:1px solid var(--nav-border);
+  height:var(--nav-h);background:var(--navbg);
+  backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+  border-top:1px solid var(--navb);
   display:flex;gap:6px;z-index:999;
   align-items:center;justify-content:center;
-  padding:0 12px;flex-wrap:nowrap;overflow-x:auto;
-  scrollbar-width:none;transition:background .3s,border-color .3s,opacity .5s;
+  padding:0 14px;flex-wrap:nowrap;
+  overflow-x:auto;scrollbar-width:none;
+  transition:background .3s,border-color .3s,opacity .45s;
 }
 .nav::-webkit-scrollbar{display:none}
+body.fs-idle .nav{opacity:0;pointer-events:none}
 .nav button{
-  border:1px solid var(--nav-btn-border);color:var(--text);
-  padding:5px 12px;border-radius:20px;cursor:pointer;
-  font-size:11.5px;background:var(--nav-btn);
-  transition:all .17s;white-space:nowrap;flex-shrink:0;
+  border:1px solid var(--nb2);color:var(--t2);
+  padding:6px 14px;border-radius:24px;cursor:pointer;
+  font-size:12px;background:var(--nb);
+  transition:all .16s;white-space:nowrap;flex-shrink:0;
+  font-weight:600;letter-spacing:.2px;
 }
-.nav button:hover:not(:disabled){background:#f0a500;color:#000;border-color:#f0a500;transform:translateY(-1px)}
-.nav button:active:not(:disabled){transform:translateY(0)}
-.nav button:disabled{opacity:.35;cursor:default}
-.nav button.pdf-btn{background:rgba(231,76,60,.12);border-color:rgba(231,76,60,.4);color:#c0392b}
+.nav button:hover:not(:disabled){background:var(--accent);color:#000;border-color:var(--accent);transform:translateY(-1px)}
+.nav button:active:not(:disabled){transform:translateY(0) scale(.97)}
+.nav button:disabled{opacity:.3;cursor:default}
+.nav button.active-nav{background:rgba(240,165,0,.14);color:var(--accent);border-color:rgba(240,165,0,.32)}
+.nav button.pdf-btn{background:rgba(231,76,60,.09);border-color:rgba(231,76,60,.32)}
 .nav button.pdf-btn:hover:not(:disabled){background:#e74c3c;color:#fff;border-color:#e74c3c}
 [data-theme="dark"] .nav button.pdf-btn{color:#e74c3c}
-.nav button.print-btn{background:rgba(52,152,219,.12);border-color:rgba(52,152,219,.4);color:#2471a3}
+[data-theme="light"] .nav button.pdf-btn{color:#a02020}
+.nav button.print-btn{background:rgba(52,152,219,.09);border-color:rgba(52,152,219,.32)}
 .nav button.print-btn:hover:not(:disabled){background:#3498db;color:#fff;border-color:#3498db}
 [data-theme="dark"] .nav button.print-btn{color:#3498db}
-.nav button.ref-btn{background:rgba(46,204,113,.12);border-color:rgba(46,204,113,.4);color:#1e8449}
-.nav button.ref-btn:hover:not(:disabled){background:#2ecc71;color:#000;border-color:#2ecc71}
-[data-theme="dark"] .nav button.ref-btn{color:#2ecc71}
-.nav button.theme-btn{font-size:14px;padding:5px 10px;min-width:36px}
-/* Fullscreen button */
-.nav button.fs-btn{background:rgba(155,89,182,.12);border-color:rgba(155,89,182,.4);color:#8e44ad;font-size:13px;padding:5px 10px;min-width:36px}
+[data-theme="light"] .nav button.print-btn{color:#1a6fa8}
+.nav button.ref-btn{background:rgba(0,184,148,.09);border-color:rgba(0,184,148,.32)}
+.nav button.ref-btn:hover:not(:disabled){background:#00b894;color:#000;border-color:#00b894}
+[data-theme="dark"] .nav button.ref-btn{color:#00b894}
+[data-theme="light"] .nav button.ref-btn{color:#006e55}
+.nav button.fs-btn,.nav button.theme-btn{padding:6px 10px;font-size:15px;min-width:38px}
+.nav button.fs-btn{background:rgba(155,89,182,.09);border-color:rgba(155,89,182,.32)}
 .nav button.fs-btn:hover:not(:disabled){background:#9b59b6;color:#fff;border-color:#9b59b6}
 [data-theme="dark"] .nav button.fs-btn{color:#9b59b6}
-.sep{color:var(--sep);padding:0 2px;font-size:15px;flex-shrink:0}
-#nav-info{color:var(--text3);font-size:11px;padding:0 3px;min-width:40px;text-align:center;flex-shrink:0}
-.nav-dots{display:flex;gap:4px;align-items:center;flex-shrink:0}
-.nav-dot{width:6px;height:6px;border-radius:50%;background:var(--dot);cursor:pointer;transition:all .18s;border:none;padding:0;flex-shrink:0}
-.nav-dot.active{background:#f0a500;width:18px;border-radius:3px}
+[data-theme="light"] .nav button.fs-btn{color:#6e3090}
+.sep{color:var(--sep);font-size:17px;padding:0 1px;flex-shrink:0}
+#nav-info{color:var(--t3);font-size:11.5px;padding:0 4px;min-width:40px;text-align:center;flex-shrink:0;font-weight:700}
+.nav-dots{display:flex;gap:5px;align-items:center;flex-shrink:0}
+.nav-dot{width:7px;height:7px;border-radius:50%;background:var(--dot);cursor:pointer;transition:all .2s;border:none;padding:0}
+.nav-dot.active{background:var(--accent);width:22px;border-radius:4px}
 .nav-dot:hover:not(.active){background:var(--sep)}
 
-/* ══════════════════════════════════════════
-   PRINT
-══════════════════════════════════════════ */
+/* ══ PRINT ══ */
 @media print{
-  body{background:var(--bg)!important}
-  #stage{padding:0!important;min-height:unset!important}
-  .slide-wrap{transform:none!important;margin:0!important;width:var(--sw)!important}
-  .slide{display:flex!important;opacity:1!important;transform:none!important;page-break-after:always;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body{background:var(--bg)!important;overflow:visible!important}
+  #stage{position:static!important;overflow:visible!important;inset:unset!important}
+  .slide-wrap{transform:none!important;width:1280px!important;height:auto!important}
+  .slide{
+    position:static!important;display:flex!important;
+    opacity:1!important;transform:none!important;
+    page-break-after:always;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+  }
   .nav,#pdf-ov,#init-screen,#toast,#fs-hint{display:none!important}
 }
 
-/* ══════════════════════════════════════════
-   RESPONSIVE
-══════════════════════════════════════════ */
+/* ══ RESPONSIVE ══ */
 @media(max-width:900px){
   :root{--nav-h:52px}
-  .nav button{padding:4px 9px;font-size:11px}
+  .nav button{padding:5px 10px;font-size:11px}
   .sep.hide-sm{display:none}
 }
 @media(max-width:600px){
   :root{--nav-h:50px}
   .nav{gap:4px;padding:0 8px}
-  .nav button{padding:4px 8px;font-size:10.5px}
-  .nav-dots{display:none}
-  .nav .print-btn{display:none}
+  .nav button{padding:4px 9px;font-size:10.5px}
+  .nav-dots,.nav .print-btn{display:none}
 }
-@media(max-width:380px){
-  .nav .pdf-btn .pdf-lbl{display:none}
-}
+:fullscreen .nav,:-webkit-full-screen .nav,:-moz-full-screen .nav{position:fixed;bottom:0;left:0;right:0}
 </style>
 </head>
 <body>
 
-<!-- INIT -->
+<!-- INIT SCREEN -->
 <div id="init-screen">
-  <div class="spinner"></div>
-  <p>Memuat data dari Google Sheets...</p>
-  <div class="sub" id="init-status">Menghubungkan ke server...</div>
-  <div class="init-dots">
-    <div class="init-dot"></div><div class="init-dot"></div><div class="init-dot"></div>
-  </div>
+  <div class="logo-init">📊</div>
+  <h2>Anggaran Romadan TA 2026</h2>
+  <div class="init-sub" id="init-status">Menghubungkan ke server...</div>
+  <div class="init-bar-wrap"><div class="init-bar" id="init-bar"></div></div>
+  <div class="init-status-line" id="init-detail">Mohon tunggu sebentar</div>
 </div>
 
 <div id="toast"></div>
@@ -434,108 +468,226 @@ tfoot td.r{text-align:right}
 
 <!-- PDF OVERLAY -->
 <div id="pdf-ov">
-  <div class="spinner"></div>
-  <p>Menyiapkan PDF...</p>
-  <div class="prog-text" id="pdf-progress">Memproses slide 0 / 7</div>
-  <div id="pdf-bar-wrap"><div id="pdf-bar-fill"></div></div>
+  <div class="pdf-card">
+    <div class="ring"></div>
+    <p>Menyiapkan PDF...</p>
+    <div class="pdf-prog-text" id="pdf-progress">Memproses slide 0 / 7</div>
+    <div id="pdf-bar-wrap"><div id="pdf-bar-fill"></div></div>
+  </div>
 </div>
 
 <!-- STAGE -->
 <div id="stage">
 <div class="slide-wrap" id="slide-wrap">
 
-<!-- ══ SLIDE 1 · COVER ══ -->
+<!-- ════ SLIDE 1 · COVER ════ -->
 <div class="slide slide-cover" id="slide-1">
-  <div class="badge">RAHASIA INTERNAL · BOD BRIEFING</div>
-  <div class="cover-title">Postur Anggaran &amp; Realisasi<br><span>Romadan</span> TA 2026</div>
-  <div class="cover-sub">Executive Summary — Real-time dari Google Sheets</div>
-  <div class="cover-boxes">
-    <div class="cover-box gold"><div class="lbl">TOTAL PAGU (EXCL. ASURANSI)</div><div class="amt" id="s1-pagu-excl"><span class="skel" style="width:88px;height:20px"></span></div></div>
-    <div class="cover-box teal"><div class="lbl">REALISASI S.D. BULAN INI</div><div class="amt" id="s1-realisasi"><span class="skel" style="width:88px;height:20px"></span></div></div>
-    <div class="cover-box purple"><div class="lbl">REALISASI OUTSTANDING</div><div class="amt" id="s1-outstanding"><span class="skel" style="width:88px;height:20px"></span></div></div>
-    <div class="cover-box blue2"><div class="lbl">PERSENTASE SERAPAN</div><div class="amt" id="s1-persen"><span class="skel" style="width:58px;height:20px"></span></div></div>
+  <div class="grid-deco"></div>
+  <div class="slide-num">01 / 07</div>
+  <div style="text-align:center;display:flex;flex-direction:column;align-items:center">
+    <div class="cover-eyebrow">
+      <span class="dot"></span>RAHASIA INTERNAL &middot; BOD BRIEFING
+    </div>
+    <div class="cover-title">
+      Postur Anggaran &amp; Realisasi<br><em>Romadan</em> TA 2026
+    </div>
+    <div class="cover-sub">Executive Summary &mdash; Data Real-time dari Google Sheets</div>
+    <div class="cover-kpi">
+      <div class="kpi k-gold">
+        <div class="klbl">Total Pagu (Excl. Asuransi)</div>
+        <div class="kamt" id="s1-pagu-excl">
+          <span class="skel" style="width:100px;height:22px;border-radius:4px"></span>
+        </div>
+      </div>
+      <div class="kpi k-teal">
+        <div class="klbl">Realisasi S.D. Bulan Ini</div>
+        <div class="kamt" id="s1-realisasi">
+          <span class="skel" style="width:100px;height:22px;border-radius:4px"></span>
+        </div>
+      </div>
+      <div class="kpi k-purple">
+        <div class="klbl">Realisasi Outstanding</div>
+        <div class="kamt" id="s1-outstanding">
+          <span class="skel" style="width:100px;height:22px;border-radius:4px"></span>
+        </div>
+      </div>
+      <div class="kpi k-blue">
+        <div class="klbl">Persentase Serapan</div>
+        <div class="kamt" id="s1-persen">
+          <span class="skel" style="width:70px;height:22px;border-radius:4px"></span>
+        </div>
+      </div>
+    </div>
   </div>
   <div class="ts-label" id="last-updated"></div>
   <div class="footer-slide">CONFIDENTIAL</div>
 </div>
 
-<!-- ══ SLIDE 2 · OVERVIEW ══ -->
+<!-- ════ SLIDE 2 · OVERVIEW ════ -->
 <div class="slide slide-dark" id="slide-2">
+  <div class="slide-num">02 / 07</div>
   <div class="stitle">Executive Overview</div>
-  <div class="sheading">Ringkasan Pagu Anggaran</div>
-  <div class="divider"></div>
+  <div class="sheading">Ringkasan Posisi Anggaran</div>
   <div class="cards">
-    <div class="card gold"><div class="card-icon">📊</div><div class="card-lbl">TOTAL PAGU (INCL. ASURANSI)</div><div class="card-val gold" id="s2-incl">—</div><div class="card-note">Include Asuransi Gedung</div></div>
-    <div class="card blue"><div class="card-icon">🏗️</div><div class="card-lbl">BELANJA ASURANSI GEDUNG</div><div class="card-val blue" id="s2-asuransi">—</div><div class="card-note" id="s2-asuransi-pct">—</div></div>
-    <div class="card green"><div class="card-icon">⚙️</div><div class="card-lbl">BELANJA OPERASIONAL MURNI</div><div class="card-val green" id="s2-excl">—</div><div class="card-note">Exclude Asuransi</div></div>
-    <div class="card red"><div class="card-icon">📈</div><div class="card-lbl">REALISASI KUMULATIF</div><div class="card-val red" id="s2-real">—</div><div class="card-note" id="s2-real-pct">—</div></div>
+    <div class="card gold">
+      <span class="card-icon">📊</span>
+      <div class="card-lbl">Total Pagu Incl. Asuransi</div>
+      <div class="card-val gold" id="s2-incl">—</div>
+      <div class="card-note">Total alokasi termasuk asuransi gedung</div>
+    </div>
+    <div class="card blue">
+      <span class="card-icon">🏗️</span>
+      <div class="card-lbl">Asuransi Gedung</div>
+      <div class="card-val blue" id="s2-asuransi">—</div>
+      <div class="card-note" id="s2-asuransi-pct">—</div>
+    </div>
+    <div class="card green">
+      <span class="card-icon">⚙️</span>
+      <div class="card-lbl">Operasional Murni</div>
+      <div class="card-val green" id="s2-excl">—</div>
+      <div class="card-note">Exclude asuransi gedung</div>
+    </div>
+    <div class="card red">
+      <span class="card-icon">📈</span>
+      <div class="card-lbl">Realisasi Kumulatif</div>
+      <div class="card-val red" id="s2-real">—</div>
+      <div class="card-note" id="s2-real-pct">—</div>
+    </div>
+    <div class="card purple">
+      <span class="card-icon">⏳</span>
+      <div class="card-lbl">Outstanding</div>
+      <div class="card-val purple" id="s2-out">—</div>
+      <div class="card-note" id="s2-out-pct">—</div>
+    </div>
+  </div>
+  <div class="stat-row">
+    <div class="stat-item">
+      <div class="stat-lbl">Sisa Anggaran</div>
+      <div class="stat-val" id="s2-sisa">—</div>
+      <div class="stat-sub">Belum terealisasi</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-lbl">Efisiensi Potensial</div>
+      <div class="stat-val" id="s2-efisiensi">—</div>
+      <div class="stat-sub">Estimasi dari tren serapan</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-lbl">Bulan Berjalan</div>
+      <div class="stat-val" id="s2-bulan">—</div>
+      <div class="stat-sub">Bulan aktif realisasi</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-lbl">Rata-rata / Bulan</div>
+      <div class="stat-val" id="s2-avg">—</div>
+      <div class="stat-sub">Realisasi rata-rata bulanan</div>
+    </div>
   </div>
   <div class="footer-slide">CONFIDENTIAL</div>
 </div>
 
-<!-- ══ SLIDE 3 · REALISASI PER BULAN ══ -->
+<!-- ════ SLIDE 3 · CHART ════ -->
 <div class="slide slide-dark" id="slide-3">
+  <div class="slide-num">03 / 07</div>
   <div class="stitle">Realisasi Anggaran</div>
-  <div class="sheading">Perkembangan Serapan Per Bulan</div>
-  <div class="divider"></div>
-  <div style="display:flex;gap:28px;align-items:flex-start">
-    <div style="flex:1"><div class="month-bars" id="month-bars"></div></div>
-    <div style="width:278px;display:flex;flex-direction:column;gap:8px" id="month-cards"></div>
+  <div class="sheading" style="margin-bottom:8px">Perkembangan Serapan Per Bulan</div>
+  <div class="toggle-row" id="s3-toggle">
+    <button class="tog-btn active" id="tog-bar"   onclick="setChartView('bar')">Bar Chart</button>
+    <button class="tog-btn"        id="tog-line"  onclick="setChartView('line')">Tren Kumulatif</button>
+    <button class="tog-btn"        id="tog-combo" onclick="setChartView('combo')">Gabungan</button>
+  </div>
+  <div class="chart-grid-wrap">
+    <div class="chart-main-area">
+      <div class="legend-strip" id="s3-legend"></div>
+      <div class="chart-canvas-wrap">
+        <canvas id="s3-chart"></canvas>
+      </div>
+      <div class="chart-axis-note" id="s3-axis-note">Nilai dalam Juta Rupiah · Hover untuk detail</div>
+    </div>
+    <div class="chart-side-col">
+      <div class="side-card sc-gold">
+        <div class="sc-lbl">Total Realisasi</div>
+        <div class="sc-val gold" id="s3-total">—</div>
+        <div class="sc-sub" id="s3-total-pct">dari pagu operasional</div>
+      </div>
+      <div class="side-card sc-blue">
+        <div class="sc-lbl">Bulan Tertinggi</div>
+        <div class="sc-val blue" id="s3-peak">—</div>
+        <div class="sc-sub" id="s3-peak-lbl">realisasi terbesar</div>
+      </div>
+      <div class="side-card sc-green">
+        <div class="sc-lbl">Rata-rata / Bulan</div>
+        <div class="sc-val green" id="s3-avg">—</div>
+        <div class="sc-sub" id="s3-avg-lbl">bulan aktif realisasi</div>
+      </div>
+      <div class="side-card sc-purple">
+        <div class="sc-lbl">Tren Serapan</div>
+        <div class="sc-val purple" id="s3-trend">—</div>
+        <div class="sc-sub" id="s3-trend-lbl">vs bulan sebelumnya</div>
+      </div>
+    </div>
   </div>
   <div class="footer-slide">CONFIDENTIAL</div>
 </div>
 
-<!-- ══ SLIDE 4 · TABEL PER AKUN ══ -->
+<!-- ════ SLIDE 4 · TABEL AKUN ════ -->
 <div class="slide slide-dark" id="slide-4">
+  <div class="slide-num">04 / 07</div>
   <div class="stitle">Realisasi Per Akun</div>
   <div class="sheading">Serapan Anggaran Operasional</div>
-  <div class="divider"></div>
-  <table>
-    <thead><tr>
-      <th>AKUN</th><th>URAIAN</th>
-      <th class="r">PAGU (Rp)</th><th class="r">REALISASI (Rp)</th>
-      <th class="r">OUTSTANDING (Rp)</th><th class="r">SISA (Rp)</th>
-      <th class="r">%</th>
-    </tr></thead>
-    <tbody id="akun-tbody"></tbody>
-    <tfoot id="akun-tfoot"></tfoot>
-  </table>
+  <div style="overflow:auto;flex:1">
+    <table>
+      <thead><tr>
+        <th>Akun</th><th>Uraian</th>
+        <th class="r">Pagu (Rp)</th>
+        <th class="r">Realisasi (Rp)</th>
+        <th class="r">Outstanding (Rp)</th>
+        <th class="r">Sisa (Rp)</th>
+        <th class="r">%</th>
+      </tr></thead>
+      <tbody id="akun-tbody"></tbody>
+      <tfoot id="akun-tfoot"></tfoot>
+    </table>
+  </div>
   <div class="footer-slide">CONFIDENTIAL</div>
 </div>
 
-<!-- ══ SLIDE 5 · PROGRESS BARS ══ -->
+<!-- ════ SLIDE 5 · PROGRESS BARS ════ -->
 <div class="slide slide-dark" id="slide-5">
+  <div class="slide-num">05 / 07</div>
   <div class="stitle">Visualisasi Serapan</div>
   <div class="sheading">Progress Realisasi Per Akun Belanja</div>
-  <div class="divider"></div>
-  <div id="progress-bars"></div>
+  <div id="progress-bars" style="flex:1;overflow:auto"></div>
   <div class="footer-slide">CONFIDENTIAL</div>
 </div>
 
-<!-- ══ SLIDE 6 · RPD TRIWULAN I ══ -->
+<!-- ════ SLIDE 6 · RPD ════ -->
 <div class="slide slide-dark" id="slide-6">
+  <div class="slide-num">06 / 07</div>
   <div class="stitle">Rencana Penarikan Dana</div>
-  <div class="sheading">Rencana Penarikan Dana Triwulan I</div>
-  <div class="divider"></div>
-  <table>
-    <thead><tr>
-      <th>NO</th><th>BAGIAN</th>
-      <th class="r">SEMULA RPD-TW I (Rp)</th>
-      <th class="r">REVISI RPD-TW I (Rp)</th>
-      <th class="r">REALISASI TW I (Rp)</th>
-      <th class="r">% SERAPAN</th>
-    </tr></thead>
-    <tbody id="bagian-tbody"></tbody>
-    <tfoot id="bagian-tfoot"></tfoot>
-  </table>
+  <div class="sheading">Realisasi vs RPD Triwulan I</div>
+  <div style="overflow:auto;flex:1">
+    <table>
+      <thead><tr>
+        <th>No</th><th>Bagian</th>
+        <th class="r">Semula RPD-TW I</th>
+        <th class="r">Revisi RPD-TW I</th>
+        <th class="r">Realisasi TW I</th>
+        <th class="r">% vs Revisi</th>
+        <th class="r">Selisih</th>
+      </tr></thead>
+      <tbody id="bagian-tbody"></tbody>
+      <tfoot id="bagian-tfoot"></tfoot>
+    </table>
+  </div>
+  <div id="rpd-note" style="margin-top:10px;font-size:11.5px;color:var(--t3);font-style:italic"></div>
   <div class="footer-slide">CONFIDENTIAL</div>
 </div>
 
-<!-- ══ SLIDE 7 · KESIMPULAN ══ -->
+<!-- ════ SLIDE 7 · KESIMPULAN ════ -->
 <div class="slide slide-dark" id="slide-7">
-  <div class="stitle">Kesimpulan</div>
+  <div class="slide-num">07 / 07</div>
+  <div class="stitle">Kesimpulan &amp; Rekomendasi</div>
   <div class="sheading">Poin Utama untuk Pimpinan</div>
-  <div class="divider"></div>
   <div class="points" id="kesimpulan-points"></div>
   <div class="footer-slide">CONFIDENTIAL</div>
 </div>
@@ -544,81 +696,88 @@ tfoot td.r{text-align:right}
 </div><!-- /stage -->
 
 <!-- NAV -->
-<div class="nav" id="main-nav">
-  <button id="btn-prev" onclick="prevSlide()">← Prev</button>
+<nav class="nav" id="main-nav">
+  <button id="btn-prev" onclick="prevSlide()">&#8592; Prev</button>
   <span id="nav-info">1 / 7</span>
-  <button id="btn-next" onclick="nextSlide()">Next →</button>
+  <button id="btn-next" onclick="nextSlide()">Next &#8594;</button>
   <span class="sep hide-sm">|</span>
   <div class="nav-dots" id="nav-dots"></div>
   <span class="sep hide-sm">|</span>
-  <button class="fs-btn"   id="btn-fs"    onclick="toggleFS()"    title="Fullscreen (F)">⛶</button>
-  <button class="theme-btn" id="btn-theme" onclick="toggleTheme()" title="Dark/Light (T)">🌙</button>
+  <button class="fs-btn"    id="btn-fs"    onclick="toggleFS()"    title="Fullscreen (F)">&#x26F6;</button>
+  <button class="theme-btn" id="btn-theme" onclick="toggleTheme()" title="Tema (T)">&#x1F319;</button>
   <span class="sep hide-sm">|</span>
-  <button class="ref-btn"   id="btn-ref"   onclick="loadData()">🔄 Refresh</button>
-  <button class="print-btn"                onclick="printAll()">🖨️ Print</button>
-  <button class="pdf-btn"                  onclick="downloadPDF()">⬇️ <span class="pdf-lbl">PDF</span></button>
-</div>
+  <button class="ref-btn"   id="btn-ref"   onclick="loadData()">&#8635; Refresh</button>
+  <button class="print-btn"               onclick="printAll()">&#128424; Print</button>
+  <button class="pdf-btn"   id="btn-pdf"  onclick="downloadPDF()">&#8595; <span class="pdf-lbl">PDF</span></button>
+</nav>
 
 <script>
 /* ══════════════════════════════════════════
    CONFIG
 ══════════════════════════════════════════ */
-const CFG={
-  URL:'https://script.google.com/macros/s/AKfycbyvcsWjCGNLXZV03hCoKCO-E1f3fdFEQJnchbsFILKXcMeTFGYihWRuMZbErcxLcC4VJw/exec',
-  AUTO_MS:5*60*1000,MAX_RETRY:3,RETRY_BASE:1200,
-  FS_IDLE_MS:3000,   /* ms before nav fades in fullscreen */
+const CFG = {
+  URL: 'https://script.google.com/macros/s/AKfycbyvcsWjCGNLXZV03hCoKCO-E1f3fdFEQJnchbsFILKXcMeTFGYihWRuMZbErcxLcC4VJw/exec',
+  AUTO_MS: 5 * 60 * 1000,
+  MAX_RETRY: 3,
+  RETRY_BASE: 900,
+  FS_IDLE_MS: 3500,
+  FETCH_TIMEOUT: 12000,
 };
 
-const MONTHS=['Januari','Februari','Maret','April','Mei','Juni',
-               'Juli','Agustus','September','Oktober','November','Desember'];
-const MS=MONTHS.map(m=>m.slice(0,3));
-const MC=['#3498db','#f0a500','#2ecc71','#9b59b6','#e74c3c','#1abc9c',
-          '#e67e22','#3498db','#f0a500','#2ecc71','#9b59b6','#e74c3c'];
+const MONTHS = [
+  'Januari','Februari','Maret','April','Mei','Juni',
+  'Juli','Agustus','September','Oktober','November','Desember'
+];
+const MS = MONTHS.map(m => m.slice(0, 3));
 
-const R_INCL=10,R_EXCL=11,R_ASR=6;
-const C_PAGU=2,C_JAN=3,C_REAL=15,C_SISA=16,C_OUT=17,C_PCT=19;
-const AR_ROW=1,AR_OUT=24,AR_REAL=25;
-const BAGIAN=[
-  {no:'71',bagian:'Pengembangan Strategi dan Kinerja',row:14},
-  {no:'72',bagian:'Perencanaan BMN',row:15},
-  {no:'73',bagian:'Pengelolaan BMN',row:16},
-  {no:'74',bagian:'Penatausahaan BMN',row:17},
-  {no:'75',bagian:'Manajemen Pengadaan',row:18},
+const R_INCL = 10, R_EXCL = 11, R_ASR = 6;
+const C_PAGU = 2, C_JAN = 3, C_REAL = 15, C_SISA = 16, C_OUT = 17, C_PCT = 19;
+const AR_ROW = 1, AR_OUT = 24, AR_REAL = 25;
+const BAGIAN = [
+  { no: '71', bagian: 'Pengembangan Strategi dan Kinerja', row: 14 },
+  { no: '72', bagian: 'Perencanaan BMN',                  row: 15 },
+  { no: '73', bagian: 'Pengelolaan BMN',                  row: 16 },
+  { no: '74', bagian: 'Penatausahaan BMN',                row: 17 },
+  { no: '75', bagian: 'Manajemen Pengadaan',              row: 18 },
 ];
 
 /* ══════════════════════════════════════════
    STATE
 ══════════════════════════════════════════ */
-let cur=0,loading=false,arTimer=null;
-let fsIdleTimer=null;
-const slides=Array.from(document.querySelectorAll('.slide'));
-const TOTAL=slides.length;
+let cur = 0, loading = false, arTimer = null, fsIdleTimer = null, abortCtrl = null;
+let s3ChartInst = null, s3View = 'bar';
+let s3Data = { realisasi: Array(12).fill(0), pagu: 0 };
+const slides = Array.from(document.querySelectorAll('.slide'));
+const TOTAL  = slides.length;
 
 /* ══════════════════════════════════════════
    THEME
 ══════════════════════════════════════════ */
-function getTheme(){return document.documentElement.getAttribute('data-theme')||'dark'}
-function applyThemeIcon(){
-  const btn=document.getElementById('btn-theme');
-  if(btn)btn.textContent=getTheme()==='dark'?'🌙':'☀️';
+const getTheme = () => document.documentElement.getAttribute('data-theme') || 'dark';
+
+function applyThemeIcon() {
+  const b = document.getElementById('btn-theme');
+  if (b) b.textContent = getTheme() === 'dark' ? '🌙' : '☀️';
 }
-function toggleTheme(){
-  const next=getTheme()==='dark'?'light':'dark';
-  document.documentElement.setAttribute('data-theme',next);
-  localStorage.setItem('theme',next);
+function toggleTheme() {
+  const next = getTheme() === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
   applyThemeIcon();
-  toast(next==='dark'?'🌙 Dark mode aktif':'☀️ Light mode aktif','info',2000);
+  toast(next === 'dark' ? '🌙 Dark mode aktif' : '☀️ Light mode aktif', 'info', 2000);
+  if (cur === 2) buildS3Chart(s3View, s3Data);
 }
-function initTheme(){
-  const saved=localStorage.getItem('theme');
-  if(saved){document.documentElement.setAttribute('data-theme',saved);}
-  else if(window.matchMedia?.('(prefers-color-scheme:light)').matches){
-    document.documentElement.setAttribute('data-theme','light');
+function initTheme() {
+  const saved = localStorage.getItem('theme');
+  if (saved) {
+    document.documentElement.setAttribute('data-theme', saved);
+  } else if (window.matchMedia?.('(prefers-color-scheme:light)').matches) {
+    document.documentElement.setAttribute('data-theme', 'light');
   }
   applyThemeIcon();
-  window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',e=>{
-    if(!localStorage.getItem('theme')){
-      document.documentElement.setAttribute('data-theme',e.matches?'dark':'light');
+  window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change', e => {
+    if (!localStorage.getItem('theme')) {
+      document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
       applyThemeIcon();
     }
   });
@@ -627,379 +786,866 @@ function initTheme(){
 /* ══════════════════════════════════════════
    FULLSCREEN
 ══════════════════════════════════════════ */
-function isFS(){
-  return !!(document.fullscreenElement||document.webkitFullscreenElement||
-            document.mozFullScreenElement||document.msFullscreenElement);
+const isFS = () => !!(
+  document.fullscreenElement ||
+  document.webkitFullscreenElement ||
+  document.mozFullScreenElement
+);
+function enterFS() {
+  const el = document.documentElement;
+  (el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen)?.call(el);
 }
-
-function enterFS(){
-  const el=document.documentElement;
-  const fn=el.requestFullscreen||el.webkitRequestFullscreen||
-           el.mozRequestFullScreen||el.msRequestFullscreen;
-  fn?.call(el);
+function exitFS() {
+  return (document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen)
+    ?.call(document) || Promise.resolve();
 }
+function toggleFS() { isFS() ? exitFS() : enterFS(); }
 
-function exitFS(){
-  const fn=document.exitFullscreen||document.webkitExitFullscreen||
-           document.mozCancelFullScreen||document.msExitFullscreen;
-  fn?.call(document);
-}
-
-function toggleFS(){
-  isFS()?exitFS():enterFS();
-}
-
-function updateFSBtn(){
-  const btn=document.getElementById('btn-fs');
-  if(!btn)return;
-  if(isFS()){
-    btn.textContent='⛶';
-    btn.title='Keluar Fullscreen (F / Esc)';
-    btn.style.background='rgba(155,89,182,.28)';
-    /* Show hint briefly */
-    showFSHint('Tekan Esc atau klik ⛶ untuk keluar · gerakkan mouse untuk tampilkan nav');
-    /* Start idle timer to hide nav */
+function updateFSBtn() {
+  const b = document.getElementById('btn-fs');
+  if (!b) return;
+  if (isFS()) {
+    b.textContent = '✕'; b.title = 'Keluar FS (Esc)';
+    b.classList.add('active-nav');
+    showFSHint('Gerakkan mouse untuk tampilkan kontrol · Esc untuk keluar');
     resetFSIdle();
-  }else{
-    btn.textContent='⛶';
-    btn.title='Fullscreen (F)';
-    btn.style.background='';
-    /* Clear idle when leaving FS */
+  } else {
+    b.textContent = '⛶'; b.title = 'Fullscreen (F)';
+    b.classList.remove('active-nav');
     clearFSIdle();
     document.body.classList.remove('fs-idle');
   }
-  /* Recalculate scale after FS change */
-  requestAnimationFrame(()=>requestAnimationFrame(applyScale));
+  requestAnimationFrame(() => requestAnimationFrame(applyScale));
 }
-
-/* Idle fade — nav fades after CFG.FS_IDLE_MS of no mouse movement */
-function resetFSIdle(){
+function resetFSIdle() {
   document.body.classList.remove('fs-idle');
   clearTimeout(fsIdleTimer);
-  if(isFS()){
-    fsIdleTimer=setTimeout(()=>{
-      if(isFS())document.body.classList.add('fs-idle');
-    },CFG.FS_IDLE_MS);
-  }
+  if (isFS()) fsIdleTimer = setTimeout(() => {
+    if (isFS()) document.body.classList.add('fs-idle');
+  }, CFG.FS_IDLE_MS);
 }
-function clearFSIdle(){
+function clearFSIdle() {
   clearTimeout(fsIdleTimer);
   document.body.classList.remove('fs-idle');
 }
+['mousemove','touchstart','click','keydown'].forEach(ev =>
+  document.addEventListener(ev, () => { if (isFS()) resetFSIdle(); }, { passive: true })
+);
+['fullscreenchange','webkitfullscreenchange','mozfullscreenchange'].forEach(ev =>
+  document.addEventListener(ev, updateFSBtn)
+);
 
-/* Mouse/touch activity resets idle timer while in FS */
-document.addEventListener('mousemove',()=>{if(isFS())resetFSIdle();},{passive:true});
-document.addEventListener('touchstart',()=>{if(isFS())resetFSIdle();},{passive:true});
-document.addEventListener('click',()=>{if(isFS())resetFSIdle();},{passive:true});
-
-/* Listen for FS change (Esc key etc.) */
-['fullscreenchange','webkitfullscreenchange','mozfullscreenchange','MSFullscreenChange']
-  .forEach(ev=>document.addEventListener(ev,updateFSBtn));
-
-/* ── FS Hint ── */
-let _fsHintTimer;
-function showFSHint(msg){
-  const el=document.getElementById('fs-hint');
-  el.textContent=msg;
-  el.classList.add('show');
-  clearTimeout(_fsHintTimer);
-  _fsHintTimer=setTimeout(()=>el.classList.remove('show'),2800);
+let _fhT;
+function showFSHint(msg) {
+  const el = document.getElementById('fs-hint');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(_fhT);
+  _fhT = setTimeout(() => el.classList.remove('show'), 3200);
 }
 
 /* ══════════════════════════════════════════
-   RESPONSIVE SCALE
+   SCALE
 ══════════════════════════════════════════ */
-const SW=1280,SH=720;
-function applyScale(){
-  const vw=window.innerWidth;
-  const navH=isFS()?0:
-    (parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h'))||56);
-  /* In FS the nav overlays, so subtract its height from usable space */
-  const usableNavH=isFS()?
-    (parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h'))||56):0;
-  const vh=window.innerHeight-navH-usableNavH-24;
-  const vhFS=window.innerHeight-24;
-  const availH=isFS()?vhFS:vh;
-  const sf=Math.min(vw/SW,availH/SH,1);
-  document.documentElement.style.setProperty('--sf',sf);
-  const wrap=document.getElementById('slide-wrap');
-  wrap.style.marginBottom=(SH*sf-SH)+'px';
-  const stage=document.getElementById('stage');
-  const navOffset=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h'))||56;
-  stage.style.paddingBottom=isFS()?'0':((navOffset+12)+'px');
-  const usedH=SH*sf+(isFS()?0:navOffset)+24;
-  stage.style.paddingTop=window.innerHeight>usedH?Math.floor((window.innerHeight-usedH)/2)+'px':'8px';
+const SW = 1280, SH = 720;
+function applyScale() {
+  const navH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 58;
+  const vw   = window.innerWidth;
+  const vh   = window.innerHeight - (isFS() ? 0 : navH);
+  const sf   = Math.min(vw / SW, vh / SH, 1);
+  document.documentElement.style.setProperty('--sf', sf);
+  const wrap  = document.getElementById('slide-wrap');
+  const stage = document.getElementById('stage');
+  wrap.style.cssText  = `width:${SW}px;height:${SH}px;transform:scale(${sf});transform-origin:center center;position:relative;will-change:transform`;
+  stage.style.cssText = `position:fixed;top:0;left:0;right:0;bottom:${isFS() ? 0 : navH}px;display:flex;align-items:center;justify-content:center;background:var(--bg);overflow:hidden`;
 }
-window.addEventListener('resize',applyScale,{passive:true});
+window.addEventListener('resize', applyScale, { passive: true });
 
 /* ══════════════════════════════════════════
    HELPERS
 ══════════════════════════════════════════ */
-const toNum=v=>Number(String(v??'').replace(/[^0-9.-]/g,''))||0;
-function fmt(n){
-  const v=Math.round(toNum(n));
-  if(Math.abs(v)>=1e9)return'Rp '+(v/1e9).toFixed(2).replace('.',',')+' M';
-  if(Math.abs(v)>=1e6)return'Rp '+(v/1e6).toFixed(2).replace('.',',')+' Jt';
-  return'Rp '+v.toLocaleString('id-ID');
+const toNum = v => Number(String(v ?? '').replace(/[^0-9.-]/g, '')) || 0;
+
+function fmt(n) {
+  const v    = Math.round(toNum(n));
+  const sign = v < 0 ? '- ' : '';
+  const abs  = Math.abs(v);
+  if (abs >= 1e9) return sign + 'Rp ' + (abs / 1e9).toFixed(2).replace('.', ',') + ' M';
+  if (abs >= 1e6) return sign + 'Rp ' + (abs / 1e6).toFixed(2).replace('.', ',') + ' Jt';
+  return sign + 'Rp ' + abs.toLocaleString('id-ID');
 }
-const fmtF=n=>Math.round(toNum(n)).toLocaleString('id-ID');
-function fmtP(v){const n=toNum(v);return(Math.abs(n)<=1?(n*100).toFixed(2):n.toFixed(2))+'%'}
-const pct=(r,p)=>p===0?0:(toNum(r)/toNum(p))*100;
-const pcls=p=>p>=80?'high':p>=40?'mid':'low';
+function fmtShort(v) {
+  const abs = Math.abs(v);
+  if (abs >= 1e9) return (v / 1e9).toFixed(1) + 'M';
+  if (abs >= 1e6) return (v / 1e6).toFixed(0) + 'Jt';
+  return Math.round(v).toLocaleString('id-ID');
+}
+const fmtF = n => Math.round(toNum(n)).toLocaleString('id-ID');
+
+function fmtP(v) {
+  const n = toNum(v);
+  return (Math.abs(n) <= 1 ? (n * 100).toFixed(2) : n.toFixed(2)) + '%';
+}
+function normPct(v) {
+  const n = toNum(v);
+  if (n !== 0 && Math.abs(n) < 2) return n * 100;
+  return n;
+}
+const pct  = (r, p) => toNum(p) === 0 ? 0 : (toNum(r) / toNum(p)) * 100;
+function pcls(p) {
+  if (p > 100) return 'over';
+  if (p >= 80) return 'high';
+  if (p >= 40) return 'mid';
+  return 'low';
+}
 
 /* ══════════════════════════════════════════
    TOAST
 ══════════════════════════════════════════ */
 let _tt;
-function toast(msg,type='info',dur=4000){
-  const el=document.getElementById('toast');
-  el.textContent=msg;el.className=`show ${type}`;
-  clearTimeout(_tt);_tt=setTimeout(()=>el.classList.remove('show'),dur);
+function toast(msg, type = 'info', dur = 4000) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = `show ${type}`;
+  clearTimeout(_tt);
+  _tt = setTimeout(() => el.classList.remove('show'), dur);
 }
 
 /* ══════════════════════════════════════════
-   FETCH WITH RETRY
+   FETCH
 ══════════════════════════════════════════ */
-async function fetchSheet(name,attempt=0){
-  try{
-    const r=await fetch(`${CFG.URL}?sheet=${encodeURIComponent(name)}`,{cache:'no-store'});
-    if(!r.ok)throw new Error('HTTP '+r.status);
+async function fetchSheet(name, signal, attempt = 0) {
+  const url = `${CFG.URL}?sheet=${encodeURIComponent(name)}&_t=${Date.now()}`;
+  try {
+    const r = await fetch(url, { cache: 'no-store', signal });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
     return r.json();
-  }catch(e){
-    if(attempt<CFG.MAX_RETRY){
-      await new Promise(r=>setTimeout(r,CFG.RETRY_BASE*Math.pow(2,attempt)));
-      return fetchSheet(name,attempt+1);
+  } catch (e) {
+    if (e.name === 'AbortError') throw e;
+    if (attempt < CFG.MAX_RETRY) {
+      await new Promise(r => setTimeout(r, CFG.RETRY_BASE * Math.pow(1.8, attempt)));
+      return fetchSheet(name, signal, attempt + 1);
     }
     throw e;
   }
 }
 
 /* ══════════════════════════════════════════
+   SLIDE 3 — CHART ENGINE
+══════════════════════════════════════════ */
+function getChartColors() {
+  const dark = getTheme() === 'dark';
+  return {
+    grid       : dark ? 'rgba(255,255,255,.07)'  : 'rgba(0,0,0,.07)',
+    tick       : dark ? 'rgba(240,240,248,.48)'  : 'rgba(26,30,54,.55)',
+    tooltipBg  : dark ? 'rgba(13,13,26,.96)'     : 'rgba(26,30,54,.96)',
+    tooltipBody: dark ? 'rgba(240,240,248,.85)'  : 'rgba(240,240,248,.9)',
+    ptBorder   : dark ? '#0d0d1a' : '#f3f5fb',
+    barBg      : (v, maxV) => v === 0
+                   ? 'rgba(128,128,128,.1)'
+                   : `rgba(59,130,246,${(0.5 + 0.5 * (v / maxV)).toFixed(2)})`,
+    barBorder  : v => v > 0 ? '#3b82f6' : 'rgba(128,128,128,.15)',
+  };
+}
+
+function buildS3SideCards(data) {
+  const aktif   = data.realisasi.filter(v => v > 0);
+  const total   = aktif.reduce((s, v) => s + v, 0);
+  const avg     = aktif.length ? total / aktif.length : 0;
+  const peakIdx = data.realisasi.indexOf(Math.max(...data.realisasi));
+  const peakVal = data.realisasi[peakIdx] || 0;
+  const lastTwo = aktif.slice(-2);
+
+  let trendTxt = '—', trendSub = 'Belum ada data cukup';
+  if (lastTwo.length === 2) {
+    const delta = lastTwo[1] - lastTwo[0];
+    const p     = lastTwo[0] > 0 ? ((delta / lastTwo[0]) * 100).toFixed(1) : 0;
+    trendTxt = (delta >= 0 ? '▲ +' : '▼ ') + Math.abs(p) + '%';
+    trendSub = (delta >= 0 ? 'Naik' : 'Turun') + ' dari bulan sebelumnya';
+  }
+
+  document.getElementById('s3-total')    .textContent = fmt(total);
+  document.getElementById('s3-total-pct').textContent =
+    data.pagu > 0 ? ((total / data.pagu) * 100).toFixed(2) + '% dari pagu' : 'dari pagu operasional';
+  document.getElementById('s3-peak')     .textContent = peakVal > 0 ? MS[peakIdx] + ': ' + fmt(peakVal) : '—';
+  document.getElementById('s3-peak-lbl') .textContent = peakVal > 0 ? 'Realisasi tertinggi' : 'Belum ada data';
+  document.getElementById('s3-avg')      .textContent = fmt(avg);
+  document.getElementById('s3-avg-lbl')  .textContent = aktif.length + ' bulan aktif realisasi';
+  document.getElementById('s3-trend')    .textContent = trendTxt;
+  document.getElementById('s3-trend-lbl').textContent = trendSub;
+}
+
+function buildS3Legend(view) {
+  const el    = document.getElementById('s3-legend');
+  const items = view === 'bar'
+    ? [{ color: '#3b82f6', label: 'Realisasi per bulan', type: 'sq' }]
+    : view === 'line'
+    ? [
+        { color: '#f0a500',             label: 'Kumulatif realisasi',   type: 'ln' },
+        { color: 'rgba(240,165,0,.4)',  label: 'Target pagu linear',    type: 'dash' },
+      ]
+    : [
+        { color: '#3b82f6', label: 'Realisasi bulanan',          type: 'sq' },
+        { color: '#f0a500', label: 'Kumulatif (sumbu kanan)',     type: 'ln' },
+      ];
+  el.innerHTML = items.map(i => `
+    <span class="leg-item">
+      <span class="${i.type === 'sq' ? 'leg-sq' : 'leg-ln'}"
+        style="background:${i.color};${i.type === 'dash' ? 'background:transparent;border-bottom:2px dashed rgba(240,165,0,.5);height:0' : ''}">
+      </span>
+      <span style="font-size:10px">${i.label}</span>
+    </span>`).join('');
+}
+
+function buildS3Chart(view, data) {
+  if (s3ChartInst) { s3ChartInst.destroy(); s3ChartInst = null; }
+
+  const C      = getChartColors();
+  const maxV   = Math.max(...data.realisasi, 1);
+  let cumul    = 0;
+  const kumulatif   = data.realisasi.map(v => { cumul += v; return cumul; });
+  const paguLinear  = Array.from({ length: 12 }, (_, i) => (i + 1) * (data.pagu / 12));
+
+  const commonTooltip = {
+    backgroundColor: C.tooltipBg,
+    titleColor     : '#f0a500',
+    bodyColor      : C.tooltipBody,
+    borderColor    : 'rgba(240,165,0,.22)',
+    borderWidth    : 1,
+    padding        : 10,
+    cornerRadius   : 8,
+    displayColors  : true,
+    boxWidth: 10, boxHeight: 10,
+  };
+  const commonX = {
+    ticks : { color: C.tick, font: { size: 10 }, autoSkip: false, maxRotation: 0 },
+    grid  : { color: C.grid, drawBorder: false },
+    border: { display: false },
+  };
+  const commonY = {
+    ticks : { color: C.tick, font: { size: 10 }, callback: v => fmtShort(v) },
+    grid  : { color: C.grid, drawBorder: false },
+    border: { display: false },
+  };
+
+  let cfg = {};
+
+  /* ── BAR VIEW ── */
+  if (view === 'bar') {
+    buildS3Legend('bar');
+    document.getElementById('s3-axis-note').textContent =
+      'Nilai dalam Juta Rupiah · Hover bar untuk detail lengkap';
+    cfg = {
+      type: 'bar',
+      data: {
+        labels  : MS,
+        datasets: [{
+          label          : 'Realisasi',
+          data           : data.realisasi,
+          backgroundColor: data.realisasi.map(v => C.barBg(v, maxV)),
+          borderColor    : data.realisasi.map(v => C.barBorder(v)),
+          borderWidth    : 1.5,
+          borderRadius   : 5,
+          borderSkipped  : 'bottom',
+          hoverBackgroundColor: 'rgba(96,165,250,.9)',
+          hoverBorderColor    : '#93c5fd',
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        animation : { duration: 650, easing: 'easeOutQuart' },
+        plugins   : {
+          legend : { display: false },
+          tooltip: {
+            ...commonTooltip,
+            callbacks: {
+              title: items => MONTHS[items[0].dataIndex],
+              label: ctx => {
+                const v = ctx.raw;
+                const p = data.pagu > 0 ? ((v / data.pagu) * 100).toFixed(2) : '0';
+                return [' Realisasi: ' + fmt(v), ' % dari pagu: ' + p + '%'];
+              },
+              afterLabel: ctx => {
+                let c = 0;
+                for (let i = 0; i <= ctx.dataIndex; i++) c += data.realisasi[i];
+                return [' Kumulatif s.d. bulan ini: ' + fmt(c)];
+              },
+            },
+          },
+        },
+        scales: { x: commonX, y: commonY },
+      },
+    };
+
+  /* ── LINE VIEW ── */
+  } else if (view === 'line') {
+    buildS3Legend('line');
+    document.getElementById('s3-axis-note').textContent =
+      'Garis oranye = kumulatif realisasi · Garis putus = target linear pagu';
+    cfg = {
+      type: 'line',
+      data: {
+        labels  : MS,
+        datasets: [
+          {
+            label          : 'Kumulatif Realisasi',
+            data           : kumulatif,
+            borderColor    : '#f0a500',
+            backgroundColor: 'rgba(240,165,0,.1)',
+            borderWidth    : 2.5,
+            pointRadius    : kumulatif.map((_, i) => data.realisasi[i] > 0 ? 5 : 0),
+            pointHoverRadius    : 7,
+            pointBackgroundColor: '#f0a500',
+            pointBorderColor    : C.ptBorder,
+            pointBorderWidth    : 2,
+            fill   : true,
+            tension: 0.35,
+          },
+          {
+            label       : 'Target Pagu',
+            data        : paguLinear,
+            borderColor : 'rgba(240,165,0,.35)',
+            backgroundColor: 'transparent',
+            borderWidth : 1.5,
+            borderDash  : [6, 4],
+            pointRadius : 0,
+            fill        : false,
+            tension     : 0,
+          },
+        ],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        animation : { duration: 650, easing: 'easeOutQuart' },
+        plugins   : {
+          legend : { display: false },
+          tooltip: {
+            ...commonTooltip,
+            mode: 'index', intersect: false,
+            callbacks: {
+              title: items => MONTHS[items[0].dataIndex],
+              label: ctx => ctx.datasetIndex === 0
+                ? ' Kumulatif: ' + fmt(ctx.raw)
+                : ' Target linear: ' + fmt(ctx.raw),
+              afterBody: items => {
+                const idx  = items[0].dataIndex;
+                const gap  = kumulatif[idx] - paguLinear[idx];
+                return [gap >= 0
+                  ? ' ▲ Di atas target: ' + fmt(gap)
+                  : ' ▼ Di bawah target: ' + fmt(Math.abs(gap))];
+              },
+            },
+          },
+        },
+        scales: { x: commonX, y: commonY },
+      },
+    };
+
+  /* ── COMBO VIEW ── */
+  } else {
+    buildS3Legend('combo');
+    document.getElementById('s3-axis-note').textContent =
+      'Bar = bulanan (kiri) · Garis oranye = kumulatif (kanan) · Hover untuk detail';
+    cfg = {
+      type: 'bar',
+      data: {
+        labels  : MS,
+        datasets: [
+          {
+            type           : 'bar',
+            label          : 'Realisasi Bulanan',
+            data           : data.realisasi,
+            backgroundColor: data.realisasi.map(v => C.barBg(v, maxV)),
+            borderColor    : data.realisasi.map(v => C.barBorder(v)),
+            borderWidth    : 1.5,
+            borderRadius   : 5,
+            borderSkipped  : 'bottom',
+            hoverBackgroundColor: 'rgba(96,165,250,.9)',
+            yAxisID: 'y',
+            order  : 2,
+          },
+          {
+            type           : 'line',
+            label          : 'Kumulatif',
+            data           : kumulatif,
+            borderColor    : '#f0a500',
+            backgroundColor: 'transparent',
+            borderWidth    : 2.5,
+            pointRadius    : kumulatif.map((_, i) => data.realisasi[i] > 0 ? 5 : 0),
+            pointHoverRadius    : 7,
+            pointBackgroundColor: '#f0a500',
+            pointBorderColor    : C.ptBorder,
+            pointBorderWidth    : 2,
+            yAxisID: 'y1',
+            tension: 0.35,
+            order  : 1,
+          },
+        ],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        animation : { duration: 650, easing: 'easeOutQuart' },
+        plugins   : {
+          legend : { display: false },
+          tooltip: {
+            ...commonTooltip,
+            mode: 'index', intersect: false,
+            callbacks: {
+              title: items => MONTHS[items[0].dataIndex],
+              label: ctx => {
+                if (ctx.datasetIndex === 0) {
+                  const p = data.pagu > 0 ? ((ctx.raw / data.pagu) * 100).toFixed(2) : '0';
+                  return ' Bulanan: ' + fmt(ctx.raw) + ' (' + p + '%)';
+                }
+                return ' Kumulatif: ' + fmt(ctx.raw);
+              },
+            },
+          },
+        },
+        scales: {
+          x : commonX,
+          y : { ...commonY, position: 'left' },
+          y1: {
+            type    : 'linear',
+            position: 'right',
+            ticks   : { color: 'rgba(240,165,0,.65)', font: { size: 10 }, callback: v => fmtShort(v) },
+            grid    : { drawOnChartArea: false, drawBorder: false },
+            border  : { display: false },
+          },
+        },
+      },
+    };
+  }
+
+  s3ChartInst = new Chart(document.getElementById('s3-chart'), cfg);
+}
+
+function setChartView(view) {
+  s3View = view;
+  ['bar', 'line', 'combo'].forEach(v =>
+    document.getElementById('tog-' + v).classList.toggle('active', v === view)
+  );
+  buildS3Chart(view, s3Data);
+}
+
+/* ══════════════════════════════════════════
    RENDER
 ══════════════════════════════════════════ */
-function render(sumRows,arRows){
-  const paguExcl=toNum(sumRows[R_EXCL]?.[C_PAGU]);
-  const paguIncl=toNum(sumRows[R_INCL]?.[C_PAGU]);
-  const paguAsr =toNum(sumRows[R_ASR]?.[C_PAGU]);
-  const realKum =toNum(sumRows[R_EXCL]?.[C_REAL]);
-  const pctSer  =sumRows[R_EXCL]?.[C_PCT];
-  const arOut   =toNum(arRows[AR_ROW]?.[AR_OUT]);
-  const arReal  =toNum(arRows[AR_ROW]?.[AR_REAL]);
+function render(sumRows, arRows) {
+  const paguExcl = toNum(sumRows[R_EXCL]?.[C_PAGU]);
+  const paguIncl = toNum(sumRows[R_INCL]?.[C_PAGU]);
+  const paguAsr  = toNum(sumRows[R_ASR] ?.[C_PAGU]);
+  const realKum  = toNum(sumRows[R_EXCL]?.[C_REAL]);
+  const pctSer   = sumRows[R_EXCL]?.[C_PCT];
+  const arOut    = toNum(arRows[AR_ROW]?.[AR_OUT]);
+  const arReal   = toNum(arRows[AR_ROW]?.[AR_REAL]);
 
-  const akunData=[];
-  for(let i=2;i<=9;i++){
-    const r=sumRows[i];
-    if(!r||(!r[0]&&!r[1]))continue;
+  const akunData = [];
+  for (let i = 2; i <= 9; i++) {
+    const r = sumRows[i];
+    if (!r || (!r[0] && !r[1])) continue;
     akunData.push({
-      akun:r[0],uraian:r[1],pagu:toNum(r[C_PAGU]),
-      bulan:MONTHS.map((_,mi)=>toNum(r[C_JAN+mi])),
-      real:toNum(r[C_REAL]),sisa:toNum(r[C_SISA]),
-      out:toNum(r[C_OUT]),pct:r[C_PCT]
+      akun : r[0], uraian: r[1],
+      pagu : toNum(r[C_PAGU]),
+      bulan: MONTHS.map((_, mi) => toNum(r[C_JAN + mi])),
+      real : toNum(r[C_REAL]),
+      sisa : toNum(r[C_SISA]),
+      out  : toNum(r[C_OUT]),
+      pct  : r[C_PCT],
     });
   }
 
-  const now=new Date();
-  document.getElementById('last-updated').textContent=
-    'Data diperbarui: '+
-    now.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})+
-    ' '+now.toLocaleTimeString('id-ID');
+  const ops      = akunData.filter(d => String(d.akun) !== '523113');
+  const tP       = ops.reduce((s, d) => s + d.pagu, 0);
+  const tR       = ops.reduce((s, d) => s + d.real, 0);
+  const tO       = ops.reduce((s, d) => s + d.out,  0);
+  const tS       = ops.reduce((s, d) => s + d.sisa, 0);
+  const totBln   = MONTHS.map((_, mi) => ops.reduce((s, d) => s + d.bulan[mi], 0));
+  const activeBln = totBln.filter(v => v > 0).length;
+  const avgBln    = activeBln > 0 ? tR / activeBln : 0;
 
-  /* Slide 1 */
-  ['s1-pagu-excl','s1-realisasi','s1-outstanding','s1-persen'].forEach((id,i)=>{
-    document.getElementById(id).textContent=
-      [fmt(paguExcl),fmt(arReal),fmt(arOut),fmtP(pctSer)][i];
-  });
+  /* Timestamp */
+  const now = new Date();
+  document.getElementById('last-updated').textContent =
+    'Diperbarui: ' +
+    now.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) +
+    ' ' + now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 
-  /* Slide 2 */
-  document.getElementById('s2-incl').textContent=fmt(paguIncl);
-  document.getElementById('s2-asuransi').textContent=fmt(paguAsr);
-  document.getElementById('s2-asuransi-pct').textContent=pct(paguAsr,paguIncl).toFixed(1)+'% dari total pagu';
-  document.getElementById('s2-excl').textContent=fmt(paguExcl);
-  document.getElementById('s2-real').textContent=fmt(realKum);
-  document.getElementById('s2-real-pct').textContent='Serapan '+pct(realKum,paguExcl).toFixed(2)+'%';
+  /* ── SLIDE 1 ── */
+  document.getElementById('s1-pagu-excl') .textContent = fmt(paguExcl);
+  document.getElementById('s1-realisasi') .textContent = fmt(arReal);
+  document.getElementById('s1-outstanding').textContent = fmt(arOut);
+  document.getElementById('s1-persen')    .textContent = fmtP(pctSer);
 
-  /* Slide 3 */
-  const totBln=MONTHS.map((_,mi)=>
-    akunData.filter(d=>String(d.akun)!=='523113').reduce((s,d)=>s+d.bulan[mi],0));
-  const maxV=Math.max(...totBln,1);
-  document.getElementById('month-bars').innerHTML=totBln.map((v,i)=>{
-    const tH=Math.max(2,Math.round((v/maxV)*132));
-    const ps=pct(v,paguExcl).toFixed(1)+'%';
-    const col=v>0?MC[i]:'rgba(128,128,128,.18)';
-    return`<div class="month-col">
-      <div class="bar-wrap">
-        <div class="bar" id="bar-${i}"
-          style="height:0;background:linear-gradient(180deg,${col},${col}99)"
-          data-target="${tH}" data-tip="${MONTHS[i]}: ${fmt(v)} (${ps})">
-          ${v>0?ps:''}
-        </div>
-      </div>
-      <div class="month-lbl">${MS[i]}</div>
-      <div class="month-amt">${v>0?fmt(v):'—'}</div>
-    </div>`;
-  }).join('');
-  window._bars=()=>totBln.forEach((_,i)=>{
-    const el=document.getElementById('bar-'+i);
-    if(el)el.style.height=el.dataset.target+'px';
-  });
+  /* ── SLIDE 2 ── */
+  document.getElementById('s2-incl')        .textContent = fmt(paguIncl);
+  document.getElementById('s2-asuransi')    .textContent = fmt(paguAsr);
+  document.getElementById('s2-asuransi-pct').textContent = pct(paguAsr, paguIncl).toFixed(1) + '% dari total pagu';
+  document.getElementById('s2-excl')        .textContent = fmt(paguExcl);
+  document.getElementById('s2-real')        .textContent = fmt(tR);
+  document.getElementById('s2-real-pct')    .textContent = 'Serapan ' + pct(tR, paguExcl).toFixed(2) + '%';
+  document.getElementById('s2-out')         .textContent = fmt(arOut);
+  document.getElementById('s2-out-pct')     .textContent = pct(arOut, paguExcl).toFixed(2) + '% dari pagu';
+  document.getElementById('s2-sisa')        .textContent = fmt(tS);
+  document.getElementById('s2-efisiensi')   .textContent = pct(tR + tO, paguExcl).toFixed(1) + '%';
+  document.getElementById('s2-bulan')       .textContent = activeBln + ' Bulan';
+  document.getElementById('s2-avg')         .textContent = fmt(avgBln);
 
-  const active=totBln.map((v,i)=>({v,i})).filter(x=>x.v>0).slice(-3);
-  const cc=['blue','gold','green'];
-  document.getElementById('month-cards').innerHTML=active.length
-    ?active.map((m,ci)=>`
-      <div class="card ${cc[ci]}" style="padding:12px">
-        <div class="card-lbl">REALISASI ${MONTHS[m.i].toUpperCase()}</div>
-        <div class="card-val ${cc[ci]}" style="font-size:15px">${fmtF(m.v)}</div>
-        <div class="card-note">${pct(m.v,paguExcl).toFixed(2)}% dari pagu operasional</div>
-      </div>`).join('')
-    :'<div style="color:var(--text3);font-size:12px">Belum ada realisasi</div>';
+  /* ── SLIDE 3 — update chart data ── */
+  s3Data = { realisasi: totBln, pagu: paguExcl };
+  buildS3SideCards(s3Data);
+  /* Chart built when slide is shown via _animBars */
+  window._animBars = () => buildS3Chart(s3View, s3Data);
 
-  /* Slide 4 */
-  const ops=akunData.filter(d=>String(d.akun)!=='523113');
-  document.getElementById('akun-tbody').innerHTML=ops.map(d=>{
-    const p=pct(d.real,d.pagu);
-    return`<tr title="${d.uraian} — Serapan ${p.toFixed(2)}%">
+  /* ── SLIDE 4 ── */
+  document.getElementById('akun-tbody').innerHTML = ops.map(d => {
+    const p = pct(d.real, d.pagu);
+    return `<tr>
       <td><span class="akun-badge">${d.akun}</span></td>
-      <td>${d.uraian}</td>
-      <td class="r">${fmtF(d.pagu)}</td><td class="r">${fmtF(d.real)}</td>
-      <td class="r">${fmtF(d.out)}</td><td class="r">${fmtF(d.sisa)}</td>
+      <td style="max-width:195px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"
+          title="${d.uraian}">${d.uraian}</td>
+      <td class="r">${fmtF(d.pagu)}</td>
+      <td class="r">${fmtF(d.real)}</td>
+      <td class="r">${fmtF(d.out)}</td>
+      <td class="r">${fmtF(d.sisa)}</td>
       <td class="r"><span class="pct-pill ${pcls(p)}">${p.toFixed(1)}%</span></td>
     </tr>`;
   }).join('');
-  const tP=ops.reduce((s,d)=>s+d.pagu,0);
-  const tR=ops.reduce((s,d)=>s+d.real,0);
-  const tO=ops.reduce((s,d)=>s+d.out,0);
-  const tS=ops.reduce((s,d)=>s+d.sisa,0);
-  document.getElementById('akun-tfoot').innerHTML=`<tr>
-    <td colspan="2">TOTAL OPERASIONAL (EXCL. ASURANSI)</td>
-    <td class="r">${fmtF(tP)}</td><td class="r">${fmtF(tR)}</td>
-    <td class="r">${fmtF(tO)}</td><td class="r">${fmtF(tS)}</td>
-    <td class="r">${pct(tR,tP).toFixed(1)}%</td>
+
+  document.getElementById('akun-tfoot').innerHTML = `<tr>
+    <td colspan="2" style="color:var(--accent)">Total Operasional (Excl. Asuransi)</td>
+    <td class="r">${fmtF(tP)}</td>
+    <td class="r">${fmtF(tR)}</td>
+    <td class="r">${fmtF(tO)}</td>
+    <td class="r">${fmtF(tS)}</td>
+    <td class="r">${pct(tR, tP).toFixed(1)}%</td>
   </tr>`;
 
-  /* Slide 5 */
-  document.getElementById('progress-bars').innerHTML=
-    ops.map(d=>{
-      const p=pct(d.real,d.pagu);
-      const w=Math.min(Math.max(p,.3),100);
-      const fill=p>=80?'linear-gradient(90deg,#27ae60,#1e8449)'
-                :p>=40?'linear-gradient(90deg,#d35400,#a04000)'
-                :p>0  ?'linear-gradient(90deg,#c0392b,#922b21)'
-                       :'rgba(128,128,128,.18)';
-      return`<div class="prog-row">
+  /* ── SLIDE 5 ── */
+  document.getElementById('progress-bars').innerHTML =
+    ops.map(d => {
+      const p    = pct(d.real, d.pagu);
+      const w    = Math.min(Math.max(p, .2), 100);
+      const fill = p >= 80 ? 'linear-gradient(90deg,#00b894,#00796b)'
+                 : p >= 40 ? 'linear-gradient(90deg,#f0a500,#e67e22)'
+                 : p > 0   ? 'linear-gradient(90deg,#e74c3c,#c0392b)'
+                            : 'rgba(128,128,128,.15)';
+      const glow = p >= 80 ? 'rgba(0,184,148,.3)'
+                 : p >= 40 ? 'rgba(240,165,0,.3)'
+                 : p > 0   ? 'rgba(231,76,60,.2)' : 'none';
+      return `<div class="prog-row">
         <div class="prog-header">
           <span class="prog-name">${d.akun} · ${d.uraian}</span>
           <span class="prog-vals">${fmt(d.real)} / ${fmt(d.pagu)} | <strong>${p.toFixed(1)}%</strong></span>
         </div>
-        <div class="prog-bar"><div class="prog-fill" data-w="${w}" style="background:${fill}"></div></div>
+        <div class="prog-bar">
+          <div class="prog-fill" data-w="${w}"
+            style="background:${fill};${p > 0 ? `box-shadow:2px 0 8px ${glow}` : ''}">
+          </div>
+        </div>
       </div>`;
-    }).join('')+`
-  <div class="prog-row" style="margin-top:13px;padding-top:11px;border-top:1px solid var(--card-border)">
-    <div class="prog-header">
-      <span class="prog-name" style="font-weight:700;color:#f0a500">TOTAL OPERASIONAL</span>
-      <span class="prog-vals" style="color:#f0a500">${fmt(tR)} / ${fmt(tP)} |
-        <strong>${pct(tR,tP).toFixed(1)}%</strong></span>
-    </div>
-    <div class="prog-bar" style="height:11px">
-      <div class="prog-fill" data-w="${Math.max(pct(tR,tP),.3)}"
-        style="background:linear-gradient(90deg,#e69500,#c67c00)"></div>
-    </div>
-  </div>`;
-  window._bars5=()=>{
-    document.querySelectorAll('#progress-bars .prog-fill').forEach(el=>{
-      el.style.width=el.dataset.w+'%';
-    });
-  };
+    }).join('') + `
+    <div class="prog-row" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--gb)">
+      <div class="prog-header">
+        <span class="prog-name" style="font-weight:700;color:var(--accent);font-size:13px">
+          Total Operasional (Excl. Asuransi)
+        </span>
+        <span class="prog-vals" style="color:var(--accent)">
+          ${fmt(tR)} / ${fmt(tP)} | <strong>${pct(tR, tP).toFixed(1)}%</strong>
+        </span>
+      </div>
+      <div class="prog-bar" style="height:11px">
+        <div class="prog-fill" data-w="${Math.max(pct(tR, tP), .2)}"
+          style="background:linear-gradient(90deg,var(--accent),var(--accent2));
+                 box-shadow:2px 0 10px rgba(240,165,0,.38)">
+        </div>
+      </div>
+    </div>`;
 
-  /* Slide 6 */
-  const bagRows=BAGIAN.map(b=>{
-    const r=sumRows[b.row]||[];
-    return{...b,semula:toNum(r[2]),revisi:toNum(r[6]),real:toNum(r[7]),pct:r[8]};
+  window._animBars5 = () =>
+    document.querySelectorAll('#progress-bars .prog-fill')
+            .forEach(el => { el.style.width = el.dataset.w + '%'; });
+
+  /* ── SLIDE 6 — RPD ── */
+  const bagRows = BAGIAN.map(b => {
+    const r      = sumRows[b.row] || [];
+    const semula = toNum(r[2]);
+    const revisi = toNum(r[6]);
+    const real   = toNum(r[7]);
+    const pctCalc = revisi > 0 ? (real / revisi) * 100 : 0;
+    return { ...b, semula, revisi, real, pctCalc, selisih: real - revisi };
   });
-  const tSem=bagRows.reduce((s,b)=>s+b.semula,0);
-  const tRev=bagRows.reduce((s,b)=>s+b.revisi,0);
-  const tR6 =bagRows.reduce((s,b)=>s+b.real,0);
-  const tP6 =tRev>0?(tR6/tRev)*100:0;
-  document.getElementById('bagian-tbody').innerHTML=bagRows.map(b=>{
-    const pv=Math.abs(toNum(b.pct))<=1?toNum(b.pct)*100:toNum(b.pct);
-    return`<tr>
-      <td>${b.no}</td><td>${b.bagian}</td>
-      <td class="r">${fmtF(b.semula)}</td><td class="r">${fmtF(b.revisi)}</td>
+  const tSem = bagRows.reduce((s, b) => s + b.semula, 0);
+  const tRev = bagRows.reduce((s, b) => s + b.revisi, 0);
+  const tR6  = bagRows.reduce((s, b) => s + b.real,   0);
+  const tP6  = tRev > 0 ? (tR6 / tRev) * 100 : 0;
+  const tSel = tR6 - tRev;
+
+  document.getElementById('bagian-tbody').innerHTML = bagRows.map(b => {
+    const sc     = pcls(b.pctCalc);
+    const selClr = b.selisih >= 0 ? 'color:#00b894' : 'color:#e74c3c';
+    const selPfx = b.selisih >= 0 ? '▲ ' : '▼ ';
+    return `<tr>
+      <td><span class="akun-badge">${b.no}</span></td>
+      <td>${b.bagian}</td>
+      <td class="r">${fmtF(b.semula)}</td>
+      <td class="r">${fmtF(b.revisi)}</td>
       <td class="r">${fmtF(b.real)}</td>
-      <td class="r"><span class="pct-pill ${pcls(pv)}">${pv.toFixed(2)}%</span></td>
+      <td class="r"><span class="pct-pill ${sc}">${b.pctCalc.toFixed(2)}%</span></td>
+      <td class="r" style="${selClr};font-size:11px">${selPfx}${fmtF(Math.abs(b.selisih))}</td>
     </tr>`;
   }).join('');
-  document.getElementById('bagian-tfoot').innerHTML=`<tr>
-    <td colspan="2">TOTAL</td>
-    <td class="r">${fmtF(tSem)}</td><td class="r">${fmtF(tRev)}</td>
-    <td class="r">${fmtF(tR6)}</td><td class="r">${tP6.toFixed(2)}%</td>
+
+  document.getElementById('bagian-tfoot').innerHTML = `<tr>
+    <td colspan="2" style="color:var(--accent)">Total</td>
+    <td class="r">${fmtF(tSem)}</td>
+    <td class="r">${fmtF(tRev)}</td>
+    <td class="r">${fmtF(tR6)}</td>
+    <td class="r"><span class="pct-pill ${pcls(tP6)}">${tP6.toFixed(2)}%</span></td>
+    <td class="r" style="${tSel >= 0 ? 'color:#00b894' : 'color:#e74c3c'};font-size:11.5px">
+      ${tSel >= 0 ? '▲ ' : '▼ '}${fmtF(Math.abs(tSel))}
+    </td>
   </tr>`;
 
-  /* Slide 7 */
-  const top =[...ops].sort((a,b)=>pct(b.real,b.pagu)-pct(a.real,a.pagu))[0];
-  const zero=ops.filter(d=>d.real===0);
-  const low =ops.find(d=>d.pagu>100e6&&pct(d.real,d.pagu)<20);
-  const pT  =pct(tR,tP);
-  const lastA=MONTHS.reduce((l,_,i)=>totBln[i]>0?i:l,-1);
-  let pts=`
-  <div class="point"><div class="point-icon">📉</div><div class="point-text">
-    <strong>Serapan Kumulatif — ${pT.toFixed(2)}%</strong>
-    <p>Dari pagu operasional ${fmt(paguExcl)}, telah terealisasi ${fmt(tR)}
-    ${lastA>=0?' s.d. '+MONTHS[lastA]+' 2026':''}.
-    Realisasi outstanding tercatat ${fmt(arOut)}.</p>
-  </div></div>`;
-  if(top)pts+=`
-  <div class="point"><div class="point-icon">🏆</div><div class="point-text">
-    <strong>Akun Paling Progresif — ${top.akun}</strong>
-    <p>${top.uraian} telah terserap ${pct(top.real,top.pagu).toFixed(1)}%
-    (${fmt(top.real)}) — tertinggi dibanding akun lain.</p>
-  </div></div>`;
-  if(low)pts+=`
-  <div class="point"><div class="point-icon">⚡</div><div class="point-text">
-    <strong>Perlu Akselerasi — ${low.akun}</strong>
-    <p>${low.uraian} baru terserap ${pct(low.real,low.pagu).toFixed(1)}%
-    dari pagu ${fmt(low.pagu)} — perlu percepatan segera.</p>
-  </div></div>`;
-  if(zero.length)pts+=`
-  <div class="point"><div class="point-icon">⚠️</div><div class="point-text">
-    <strong>${zero.length} Akun Belum Ada Realisasi</strong>
-    <p>${zero.map(d=>d.akun+' ('+d.uraian+')').join(', ')} —
-    perlu monitoring dan percepatan kegiatan.</p>
-  </div></div>`;
-  document.getElementById('kesimpulan-points').innerHTML=pts;
+  const overBag = bagRows.filter(b => b.pctCalc > 100);
+  const noteEl  = document.getElementById('rpd-note');
+  if (overBag.length) {
+    noteEl.innerHTML =
+      '⚡ <strong style="color:var(--accent)">' + overBag.length + ' bagian</strong>' +
+      ' melampaui RPD Revisi: ' +
+      overBag.map(b =>
+        '<strong>' + b.bagian.split(' ').slice(0, 3).join(' ') +
+        '</strong> (' + b.pctCalc.toFixed(1) + '%)'
+      ).join(', ') + ' — realisasi melebihi rencana.';
+  } else {
+    noteEl.textContent = '';
+  }
+
+  /* ── SLIDE 7 ── */
+  buildKesimpulan({
+    akunData, ops, tP, tR, tO, tS,
+    totBln, paguExcl, arOut, arReal,
+    bagRows, tP6, activeBln, avgBln, pctSer,
+  });
+}
+
+/* ══════════════════════════════════════════
+   DYNAMIC KESIMPULAN
+══════════════════════════════════════════ */
+function buildKesimpulan({
+  akunData, ops, tP, tR, tO, tS,
+  totBln, paguExcl, arOut, arReal,
+  bagRows, tP6, activeBln, avgBln, pctSer,
+}) {
+  const pctTotal = pct(tR, tP);
+  const lastA    = MONTHS.reduce((l, _, i) => totBln[i] > 0 ? i : l, -1);
+  const sorted   = [...ops].sort((a, b) => pct(b.real, b.pagu) - pct(a.real, a.pagu));
+  const top3     = sorted.slice(0, 3).filter(d => d.real > 0);
+  const bottom3  = [...ops]
+    .sort((a, b) => pct(a.real, a.pagu) - pct(b.real, b.pagu))
+    .slice(0, 3).filter(d => d.pagu > 50e6);
+  const zero     = ops.filter(d => d.real === 0);
+  const over100  = bagRows.filter(b => b.pctCalc > 100);
+  const under50  = bagRows.filter(b => b.pctCalc < 50 && b.revisi > 0);
+  const pctNorm  = normPct(pctSer);
+  const bulanSisa = 12 - (lastA + 1);
+
+  const status =
+    pctNorm >= 80 ? { label: 'Sangat Baik ✅', cls: 'gi' } :
+    pctNorm >= 60 ? { label: 'Baik 🟡',         cls: 'ya' } :
+    pctNorm >= 40 ? { label: 'Perlu Perhatian 🟠', cls: 'ya' } :
+                   { label: 'Kritis 🔴',          cls: 're' };
+
+  const proyeksi = activeBln > 0
+    ? Math.min(pctTotal + (avgBln / tP) * 100 * bulanSisa, 100)
+    : pctTotal;
+
+  const pts = [];
+
+  /* 1 · Status serapan */
+  pts.push({
+    icon: '📊', cls: status.cls,
+    title: `Status Serapan: ${status.label}`,
+    body:
+      `Realisasi kumulatif ${pctNorm.toFixed(2)}% — ${fmt(tR)} dari pagu ${fmt(paguExcl)}` +
+      (lastA >= 0 ? ` s.d. ${MONTHS[lastA]} 2026` : '') +
+      `. Outstanding ${fmt(arOut)}. Proyeksi akhir tahun: ±${proyeksi.toFixed(1)}%.`,
+  });
+
+  /* 2 · Top akun */
+  if (top3.length) {
+    pts.push({
+      icon: '🏆', cls: 'ya',
+      title: 'Akun dengan Serapan Tertinggi',
+      body:
+        top3.map(d => `${d.akun} (${pct(d.real, d.pagu).toFixed(1)}%)`).join(', ') +
+        `. Akun ${top3[0].akun} (${top3[0].uraian}) memimpin — ${fmt(top3[0].real)}.`,
+    });
+  }
+
+  /* 3 · Akselerasi */
+  if (bottom3.length) {
+    pts.push({
+      icon: '⚡', cls: 're',
+      title: 'Akselerasi Diperlukan Segera',
+      body:
+        bottom3.map(d => `${d.akun} (${pct(d.real, d.pagu).toFixed(1)}%)`).join(', ') +
+        ' — serapan rendah. Perlu review kendala teknis, administratif, atau kontraktual.',
+    });
+  }
+
+  /* 4 · Akun nol */
+  if (zero.length) {
+    pts.push({
+      icon: '⚠️', cls: 're',
+      title: `${zero.length} Akun Realisasi Nihil`,
+      body:
+        zero.map(d => `${d.akun} (${d.uraian})`).join(', ') +
+        ' — belum ada realisasi. Segera identifikasi hambatan dan akselerasi pengadaan.',
+    });
+  }
+
+  /* 5 · Over 100% RPD */
+  if (over100.length) {
+    pts.push({
+      icon: '📈', cls: 'bl',
+      title: 'Realisasi Melampaui RPD Revisi',
+      body:
+        over100.map(b =>
+          b.bagian.split(' ').slice(0, 3).join(' ') + ' (' + b.pctCalc.toFixed(1) + '%)'
+        ).join(', ') +
+        ' melebihi rencana. Sesuaikan RPD TW berikutnya agar proyeksi kas lebih akurat.',
+    });
+  }
+
+  /* 6 · Under 50% RPD */
+  if (under50.length) {
+    pts.push({
+      icon: '📉', cls: 'pu',
+      title: 'Serapan RPD di Bawah 50%',
+      body:
+        under50.map(b =>
+          b.bagian.split(' ').slice(0, 3).join(' ') + ' (' + b.pctCalc.toFixed(1) + '%)'
+        ).join(', ') +
+        ' — evaluasi kelancaran proses untuk hindari risiko SILPA tinggi.',
+    });
+  }
+
+  /* 7 · Outstanding tinggi */
+  const outRatio = pct(arOut, tR);
+  if (outRatio > 30) {
+    pts.push({
+      icon: '🔍', cls: 'ya',
+      title: `Outstanding Tinggi: ${outRatio.toFixed(1)}% dari Realisasi`,
+      body:
+        `Nilai outstanding ${fmt(arOut)} signifikan. ` +
+        'Percepat penyelesaian tagihan dan dokumen pendukung.',
+    });
+  }
+
+  /* 8 · Target bulanan */
+  if (activeBln > 0 && bulanSisa > 0) {
+    const kebutuhan = (tP - tR) / Math.max(bulanSisa, 1);
+    pts.push({
+      icon: '🎯', cls: 'bl',
+      title: `Target: Perlu ${fmt(kebutuhan)}/Bulan`,
+      body:
+        `Dengan ${bulanSisa} bulan tersisa dan sisa anggaran ${fmt(tS)}, ` +
+        `dibutuhkan rata-rata ${fmt(kebutuhan)}/bulan. ` +
+        `Tren saat ini: ${fmt(avgBln)}/bulan` +
+        (avgBln >= kebutuhan ? ' — on track ✓' : ' — perlu akselerasi ⚠️') + '.',
+    });
+  }
+
+  document.getElementById('kesimpulan-points').innerHTML =
+    pts.slice(0, 6).map(p => `
+      <div class="point">
+        <div class="point-icon ${p.cls}">${p.icon}</div>
+        <div class="point-text">
+          <strong>${p.title}</strong>
+          <p>${p.body}</p>
+        </div>
+      </div>`).join('');
 }
 
 /* ══════════════════════════════════════════
    LOAD DATA
 ══════════════════════════════════════════ */
-async function loadData(){
-  if(loading)return;
-  loading=true;
-  const scr=document.getElementById('init-screen');
-  const sta=document.getElementById('init-status');
-  const btn=document.getElementById('btn-ref');
-  scr.classList.remove('hide','fade-out');
-  btn.disabled=true;btn.textContent='⏳';
-  try{
-    sta.textContent='Mengambil data secara paralel...';
-    const[sumRows,arRows]=await Promise.all([
-      fetchSheet('Summary2026'),
-      fetchSheet('AnggaranRealisasi2026')
+async function loadData() {
+  if (loading) return;
+  if (abortCtrl) abortCtrl.abort();
+  abortCtrl = new AbortController();
+  const sig = abortCtrl.signal;
+
+  loading = true;
+  clearTimeout(arTimer);
+
+  const scr    = document.getElementById('init-screen');
+  const bar    = document.getElementById('init-bar');
+  const status = document.getElementById('init-status');
+  const detail = document.getElementById('init-detail');
+  const btn    = document.getElementById('btn-ref');
+
+  scr.classList.remove('hide', 'fade-out');
+  scr.style.display = 'flex';
+  btn.disabled      = true;
+  btn.textContent   = '⏳';
+  bar.style.width   = '0%';
+
+  const steps = [
+    { msg: 'Menghubungkan ke server...', pct: 10 },
+    { msg: 'Mengambil data paralel...',  pct: 38 },
+    { msg: 'Memproses data...',          pct: 78 },
+    { msg: 'Merender tampilan...',       pct: 94 },
+  ];
+  let si  = 0;
+  const stm = setInterval(() => {
+    if (si < steps.length) {
+      status.textContent = steps[si].msg;
+      bar.style.width    = steps[si].pct + '%';
+      si++;
+    }
+  }, 360);
+
+  try {
+    const timeout = new Promise((_, rej) =>
+      setTimeout(() => rej(new Error('Koneksi timeout')), CFG.FETCH_TIMEOUT)
+    );
+    const [sumRows, arRows] = await Promise.race([
+      Promise.all([
+        fetchSheet('Summary2026',          sig),
+        fetchSheet('AnggaranRealisasi2026', sig),
+      ]),
+      timeout,
     ]);
-    render(sumRows,arRows);
+
+    clearInterval(stm);
+    bar.style.width    = '100%';
+    status.textContent = 'Berhasil!';
+    detail.textContent = 'Data berhasil dimuat';
+
+    render(sumRows, arRows);
+
+    setTimeout(() => {
+      scr.classList.add('fade-out');
+      setTimeout(() => scr.classList.add('hide'), 480);
+    }, 200);
+
+    toast('✅ Data berhasil diperbarui', 'ok');
+    arTimer = setTimeout(() => {
+      toast('↻ Auto-refresh...', 'info', 2200);
+      loadData();
+    }, CFG.AUTO_MS);
+
+  } catch (e) {
+    clearInterval(stm);
+    if (e.name === 'AbortError') return;
     scr.classList.add('fade-out');
-    setTimeout(()=>scr.classList.add('hide'),420);
-    toast('✅ Data berhasil diperbarui','ok');
-    clearTimeout(arTimer);
-    arTimer=setTimeout(()=>{toast('🔄 Auto-refresh...','info',2500);loadData();},CFG.AUTO_MS);
-  }catch(e){
-    scr.classList.add('fade-out');
-    setTimeout(()=>scr.classList.add('hide'),420);
-    toast('⚠️ Gagal: '+e.message+' — klik 🔄 coba lagi','err',7000);
-    console.error(e);
-  }finally{
-    loading=false;
-    btn.disabled=false;btn.textContent='🔄 Refresh';
+    setTimeout(() => scr.classList.add('hide'), 480);
+    toast('⚠️ ' + e.message + ' — Klik ↻ untuk coba lagi', 'err', 8000);
+    console.error('[loadData]', e);
+  } finally {
+    loading         = false;
+    btn.disabled    = false;
+    btn.textContent = '↻ Refresh';
     showSlide(cur);
   }
 }
@@ -1007,123 +1653,186 @@ async function loadData(){
 /* ══════════════════════════════════════════
    NAVIGATION
 ══════════════════════════════════════════ */
-function buildDots(){
-  document.getElementById('nav-dots').innerHTML=
-    slides.map((_,i)=>
-      `<button class="nav-dot${i===0?' active':''}"
-        onclick="go(${i})" title="Slide ${i+1}"></button>`
+function buildDots() {
+  document.getElementById('nav-dots').innerHTML =
+    slides.map((_, i) =>
+      `<button class="nav-dot${i === 0 ? ' active' : ''}"
+               onclick="go(${i})" title="Slide ${i + 1}"></button>`
     ).join('');
 }
 
-function showSlide(n){
-  slides.forEach((s,i)=>{
-    if(i!==n){
-      s.classList.remove('active');
-      setTimeout(()=>{if(!s.classList.contains('active'))s.style.display='none';},380);
-    }
-  });
-  slides[n].style.display='flex';
+function showSlide(n) {
+  slides.forEach((s, i) => { if (i !== n) s.classList.remove('active'); });
+  slides[n].style.display = 'flex';
   void slides[n].offsetWidth;
   slides[n].classList.add('active');
-  document.getElementById('nav-info').textContent=`${n+1} / ${TOTAL}`;
-  document.getElementById('btn-prev').disabled=n===0;
-  document.getElementById('btn-next').disabled=n===TOTAL-1;
-  document.querySelectorAll('.nav-dot').forEach((d,i)=>d.classList.toggle('active',i===n));
-  if(n===2)setTimeout(()=>window._bars?.(),200);
-  if(n===4)setTimeout(()=>window._bars5?.(),200);
+  document.getElementById('nav-info').textContent = `${n + 1} / ${TOTAL}`;
+  document.getElementById('btn-prev').disabled    = n === 0;
+  document.getElementById('btn-next').disabled    = n === TOTAL - 1;
+  document.querySelectorAll('.nav-dot').forEach((d, i) =>
+    d.classList.toggle('active', i === n)
+  );
+  if (n === 2) requestAnimationFrame(() => setTimeout(() => window._animBars?.(),  200));
+  if (n === 4) requestAnimationFrame(() => setTimeout(() => window._animBars5?.(), 200));
 }
 
-function go(n){cur=Math.max(0,Math.min(TOTAL-1,n));showSlide(cur);}
-function nextSlide(){go(cur+1);}
-function prevSlide(){go(cur-1);}
+function go(n)       { cur = Math.max(0, Math.min(TOTAL - 1, n)); showSlide(cur); }
+function nextSlide() { go(cur + 1); }
+function prevSlide() { go(cur - 1); }
 
-/* Keyboard shortcuts */
-document.addEventListener('keydown',e=>{
-  if(e.target.tagName==='INPUT')return;
-  /* Reset FS idle on any key */
-  if(isFS())resetFSIdle();
-  const map={
-    ArrowRight:nextSlide,ArrowDown:nextSlide,
-    ArrowLeft:prevSlide,ArrowUp:prevSlide,
-    Home:()=>go(0),End:()=>go(TOTAL-1),
-    f:toggleFS,F:toggleFS,
-    t:toggleTheme,T:toggleTheme,
+/* Keyboard */
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  const map = {
+    ArrowRight: nextSlide, ArrowDown: nextSlide,
+    ArrowLeft : prevSlide, ArrowUp  : prevSlide,
+    Home: () => go(0), End: () => go(TOTAL - 1),
+    f: toggleFS, F: toggleFS,
+    t: toggleTheme, T: toggleTheme,
+    r: loadData, R: loadData,
   };
-  if(map[e.key]){
-    if(['ArrowRight','ArrowLeft','ArrowDown','ArrowUp','Home','End'].includes(e.key))
-      e.preventDefault();
-    map[e.key]();
-  }
-  const n=parseInt(e.key);
-  if(n>=1&&n<=TOTAL){e.preventDefault();go(n-1);}
+  if (['ArrowRight','ArrowLeft','ArrowDown','ArrowUp','Home','End'].includes(e.key))
+    e.preventDefault();
+  map[e.key]?.();
+  const n = parseInt(e.key);
+  if (n >= 1 && n <= TOTAL) { e.preventDefault(); go(n - 1); }
 });
 
 /* Swipe */
-let _tx=0;
-document.addEventListener('touchstart',e=>{_tx=e.touches[0].clientX;},{passive:true});
-document.addEventListener('touchend',e=>{
-  const dx=e.changedTouches[0].clientX-_tx;
-  if(Math.abs(dx)>48){dx<0?nextSlide():prevSlide();}
-},{passive:true});
+let _tx = 0, _ty = 0;
+document.addEventListener('touchstart', e => {
+  _tx = e.touches[0].clientX; _ty = e.touches[0].clientY;
+}, { passive: true });
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - _tx;
+  const dy = Math.abs(e.changedTouches[0].clientY - _ty);
+  if (Math.abs(dx) > 50 && dy < 60) { dx < 0 ? nextSlide() : prevSlide(); }
+}, { passive: true });
 
-/* Double-click anywhere on slide to toggle FS */
-document.getElementById('stage').addEventListener('dblclick',toggleFS);
+/* Double-click stage → toggle FS */
+document.getElementById('stage').addEventListener('dblclick', toggleFS);
 
 /* ══════════════════════════════════════════
    PRINT
 ══════════════════════════════════════════ */
-function printAll(){
-  document.documentElement.style.setProperty('--sf','1');
-  slides.forEach(s=>{s.style.display='flex';s.style.opacity='1';s.style.transform='none';});
+function printAll() {
+  document.documentElement.style.setProperty('--sf', '1');
+  slides.forEach(s => {
+    s.style.display = 'flex'; s.style.opacity = '1'; s.style.transform = 'none';
+  });
   window.print();
-  applyScale();showSlide(cur);
+  applyScale();
+  showSlide(cur);
 }
 
 /* ══════════════════════════════════════════
-   PDF
+   PDF  —  FIXED: no freeze, chart re-rendered
 ══════════════════════════════════════════ */
-async function downloadPDF(){
-  /* Exit FS first for clean capture */
-  if(isFS())await exitFS();
-  const{jsPDF}=window.jspdf;
-  const ov=document.getElementById('pdf-ov');
-  const prog=document.getElementById('pdf-progress');
-  const bar=document.getElementById('pdf-bar-fill');
-  ov.classList.add('show');
-  document.documentElement.style.setProperty('--sf','1');
-  document.getElementById('slide-wrap').style.marginBottom='0';
-  const saved=cur;
-  const pdf=new jsPDF({orientation:'landscape',unit:'px',format:[1280,720]});
-  const bgColor=getTheme()==='dark'?'#1a1a2e':'#f0f4f8';
-  for(let i=0;i<TOTAL;i++){
-    prog.textContent=`Memproses slide ${i+1} / ${TOTAL}`;
-    bar.style.width=((i/TOTAL)*100)+'%';
-    slides.forEach((s,idx)=>{
-      s.style.display=idx===i?'flex':'none';
-      s.style.opacity=idx===i?'1':'0';
-      s.style.transform='none';
-    });
-    if(i===2){window._bars?.();await new Promise(r=>setTimeout(r,850));}
-    else if(i===4){window._bars5?.();await new Promise(r=>setTimeout(r,850));}
-    else{await new Promise(r=>setTimeout(r,300));}
-    const canvas=await html2canvas(slides[i],{
-      scale:2,useCORS:true,backgroundColor:bgColor,
-      logging:false,width:1280,height:720,
-    });
-    if(i>0)pdf.addPage([1280,720],'landscape');
-    pdf.addImage(canvas.toDataURL('image/jpeg',.93),'JPEG',0,0,1280,720);
+async function downloadPDF() {
+  const btnPdf = document.getElementById('btn-pdf');
+  btnPdf.disabled = true;
+
+  if (isFS()) {
+    try { await exitFS(); } catch (_) {}
+    await new Promise(r => setTimeout(r, 420));
   }
-  bar.style.width='100%';
-  prog.textContent='Menyimpan file...';
-  await new Promise(r=>setTimeout(r,280));
-  pdf.save('Anggaran_Romadan_TA2026.pdf');
-  ov.classList.remove('show');
-  toast('📄 PDF berhasil disimpan','ok');
-  applyScale();showSlide(saved);
+
+  const { jsPDF } = window.jspdf;
+  const ov   = document.getElementById('pdf-ov');
+  const prog = document.getElementById('pdf-progress');
+  const bar  = document.getElementById('pdf-bar-fill');
+
+  ov.classList.add('show');
+
+  const savedScale = getComputedStyle(document.documentElement)
+                       .getPropertyValue('--sf').trim() || '1';
+  document.documentElement.style.setProperty('--sf', '1');
+
+  const wrap = document.getElementById('slide-wrap');
+  wrap.style.transform       = 'scale(1)';
+  wrap.style.transformOrigin = 'top left';
+
+  const savedSlide = cur;
+  const pdf        = new jsPDF({ orientation: 'landscape', unit: 'px', format: [1280, 720] });
+  const bgColor    = getTheme() === 'dark' ? '#0d0d1a' : '#f3f5fb';
+
+  try {
+    for (let i = 0; i < TOTAL; i++) {
+      prog.textContent = `Memproses slide ${i + 1} / ${TOTAL}`;
+      bar.style.width  = ((i / TOTAL) * 100) + '%';
+
+      slides.forEach((s, idx) => {
+        s.style.transition = 'none';
+        s.style.display    = idx === i ? 'flex' : 'none';
+        s.style.opacity    = '1';
+        s.style.transform  = 'none';
+        s.style.position   = 'absolute';
+      });
+
+      if (i === 2) {
+        buildS3Chart(s3View, s3Data);
+        await new Promise(r => setTimeout(r, 1000));
+      } else if (i === 4) {
+        window._animBars5?.();
+        await new Promise(r => setTimeout(r, 950));
+      } else {
+        await new Promise(r => setTimeout(r, 320));
+      }
+
+      const canvas = await html2canvas(wrap, {
+        scale          : 2,
+        useCORS        : true,
+        backgroundColor: bgColor,
+        logging        : false,
+        width          : 1280,
+        height         : 720,
+        windowWidth    : 1280,
+        windowHeight   : 720,
+        x: 0, y: 0, scrollX: 0, scrollY: 0,
+        allowTaint     : true,
+        imageTimeout   : 8000,
+      });
+
+      if (i > 0) pdf.addPage([1280, 720], 'landscape');
+      pdf.addImage(canvas.toDataURL('image/jpeg', .92), 'JPEG', 0, 0, 1280, 720);
+    }
+
+    bar.style.width  = '100%';
+    prog.textContent = 'Menyimpan file...';
+    await new Promise(r => setTimeout(r, 300));
+    pdf.save('Anggaran_Romadan_TA2026.pdf');
+    toast('📄 PDF berhasil disimpan', 'ok');
+
+  } catch (err) {
+    console.error('[PDF]', err);
+    toast('❌ Gagal export PDF: ' + err.message, 'err', 6000);
+
+  } finally {
+    /* ── RESTORE — prevent freeze ── */
+    ov.classList.remove('show');
+    btnPdf.disabled = false;
+
+    slides.forEach(s => {
+      s.style.transition = '';
+      s.style.display    = 'none';
+      s.style.opacity    = '0';
+      s.style.transform  = '';
+      s.style.position   = '';
+    });
+
+    document.documentElement.style.setProperty('--sf', savedScale);
+    applyScale();
+
+    requestAnimationFrame(() => {
+      showSlide(savedSlide);
+      if (savedSlide === 2) setTimeout(() => buildS3Chart(s3View, s3Data), 220);
+      if (savedSlide === 4) setTimeout(() => window._animBars5?.(), 220);
+    });
+  }
 }
 
 /* ══════════════════════════════════════════
-   INIT
+   BOOT
 ══════════════════════════════════════════ */
 initTheme();
 buildDots();
